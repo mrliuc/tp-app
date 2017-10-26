@@ -1,0 +1,17 @@
+
+@font-face {font-family: "tp-icon";
+  src: url('../fonts/iconfont.ttf?t=1504512538351') format('truetype');/* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
+}
+
+.tp-icon {
+  font-family:"tp-icon" !important;
+  font-size:16px;
+  font-style:normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.tp-icon-auth-vehicle:before { content: "\e603"; }
+
+.tp-icon-auth-idinfo:before { content: "\e60f"; }
+

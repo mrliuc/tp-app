@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>Hello MUI</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="css/mui.min.css">
+		<link rel="stylesheet" href="css/mui.dtpicker.min.css">
+		<link rel="stylesheet" type="text/css" href="css/icons-extra.css" />
+		<link rel="stylesheet" type="text/css" href="css/global.css" />
+		<style>
+
+		</style>
+	</head>
+
+	<body>
+		<div id="content" style="height: 100%;background-color: red;">
+		
+			<!--下拉刷新容器-->
+			<div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+
+				<div class="mui-scroll">
+					<!--数据列表-->
+					<ul class="mui-table-view mui-table-view-chevron" v-cloak>
+						<li class="mui-table-view-cell" v-for="(topic,index) in SortTopics" v-on:tap="liTopicClick(topic)">
+							<div>
+								{{formatDateTime(topic.PickupTime)}}
+								<span style="position: absolute; right: 10px">{{formatOrderType(topic.OrderType)}}</span>
+								<br />{{topic.PickupPoint}}/{{topic.ReturnPoint}}，{{topic.TotalWeight}}KG，&yen;{{topic.Freight}}
+								<br /><span style="margin-right: 10px" v-for="container in topic.Containers">{{container.ContainerType}}&times;{{container.Quantity}}</span>&nbsp;&nbsp;{{topic.SpecialRequirements}}
+								<br />{{topic.ContactName}},{{topic.ContactPhone}}
+
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<script src="js/vue.min.js"></script>
+
+		<script src="js/mui.min.js"></script>
+		<script src="js/mui.picker.js"></script>
+		<script src="js/mui.poppicker.js"></script>
+		<script src="js/mui.dtpicker.min.js"></script>
+
+		<script src="js/common/model.js"></script>
+		<script src="js/common/vue-model-format.js"></script>
+		<script src="js/common/common.js"></script>
+
+		<script src="js/plugins/moment/moment-with-locales.min.js"></script>
+		<script src="js/plugins/linq/linq.min.js"></script>
+		<script>
+			var subVue = new Vue({
+				el: '#content',
+				data: {
+					condition: {
+						PickupTime: null,
+						AMPM: null,
+						OrderType: null,
+						ContainerType: null,
+						PickupPoint: null,
+						ReturnPoint: null,
+						TotalWeight: null,
+						City: null,
+						District: null,
+						            StatusId: null,
+
+						            ReceiverUserId:true
+					},
+					topics:[]
+				},
+				computed: {
+					SortTopics: function() {
+						var topics = Enumerable.From(this.topics);
+
+						if(this.condition.Tonnage) {
+							topics = topics.Where(function(item) {
+								return Enumerable.From(item.Containers).Any("s=>s.ContainerType==='" + topicVue.condition.Tonnage + "'");
+							});
+						}
+
+						if(this.condition.City && this.condition.District) {
+							topics = topics.Where("s=>s.City==='" + this.condition.City + "'&&s.District==='" + this.condition.District + "'");
+						}
+						return topics.OrderByDescending('s=>s.CreateTime').ToArray();
+					},
+					Condition_OrderTypeName: function() {
+						return this.formatOrderType(this.condition.OrderType);
+					}
+				},
+				watch:{
+				condition:{
+					handler:function(){
+							mui('#pullrefresh').pullRefresh().pulldownLoading();
+					},
+					deep:true
+				}
+			},
+				mounted: function() {
+					mui.init({
+						pullRefresh: {
+							container: '#pullrefresh',
+							down: {
+								callback: this.pulldownRefresh
+							},
+							up: {
+								contentrefresh: '正在加载...',
+								callback: this.pullupRefresh
+							}
+						}
+					});
+
+					if(mui.os.plus) {
+						mui.plusReady(function() {
+							setTimeout(function() {
+								mui('#pullrefresh').pullRefresh().pullupLoading();
+							}, 1000);
+
+						});
+					} else {
+						mui.ready(function() {
+							mui('#pullrefresh').pullRefresh().pulldownLoading();
+						});
+					}
+					
+					mui.plusReady(function(){
+						
+						var parentWebView=plus.webview.currentWebview().parent();
+						
+						parentWebView.addEventListener('conditionChange',function(){
+							alert(1)
+						})
+					});
+				},
+				methods: {
+					clearDate: function() {
+						this.condition.PickupTime = null;
+						this.condition.AMPM = null;
+					},
+					pickDate: function(e) {
+						var options = {
+							"type": "hour",
+							"beginDate": new Date(),
+							"endDate": moment().add(3, 'month').toDate(),
+							"customData": {
+								"h": [{
+										value: "全天",
+										text: "全天"
+									}, {
+										value: "上午",
+										text: "上午"
+									},
+									{
+										value: "下午",
+										text: "下午"
+									},
+								]
+							}
+						};
+
+						this.dtpicker = new mui.DtPicker(options);
+						this.dtpicker.show(function(rs) {
+							mapVue.condition.PickupTime = moment(new Date(rs.y.value, rs.m.value - 1, rs.d.value)).format('YYYY-MM-DD');
+							mapVue.condition.AMPM = rs.h.value;
+
+							mapVue.dtpicker.dispose();
+							mapVue.dtpicker = null;
+						});
+
+					},
+					formatDateTime: function(time) {
+						return moment(time).format('YYYY-MM-DD HH:mm');
+					},
+					formatOrderType: function(orderType) {
+						return Model.OrderTypeName[orderType];
+					},
+					pulldownRefresh: function() {
+						Util.ajaxWithLoading('/topic/receivelist', {
+							Condition: this.condition
+						}, function(result) {
+							if(!result.isSuccess) {
+								return;
+							}
+
+							subVue.topics = result.data;
+							mui('#pullrefresh').pullRefresh().endPulldownToRefresh(); //refresh completed
+						});
+					},
+					pullupRefresh: function() {
+						
+						mui('#pullrefresh').pullRefresh().endPullupToRefresh(false); //参数为true代表没有更多数据了。
+					},
+					liTopicClick: function(topic) {
+						
+						Util.setData('topic',topic);
+						
+						mui.openWindow('topic_detail.html','topic_detail.html')
+					},
+				}
+
+			});
+		</script>
+	</body>
+
+</html>

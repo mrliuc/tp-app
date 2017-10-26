@@ -1,0 +1,255 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>装箱单预录</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<style>
+			.area {
+				margin: 20px auto 0px auto;
+			}
+			
+			.mui-input-group:first-child {
+				margin-top: 20px;
+			}
+			
+			.mui-input-group label {
+				width: 33%;
+				text-align: right;
+			}
+			
+			.mui-input-row label~input,
+			.mui-input-row label~select,
+			.mui-input-row label~textarea {
+				width: 67%;
+			}
+			
+			.mui-checkbox input[type=checkbox],
+			.mui-radio input[type=radio] {
+				top: 6px;
+			}
+			
+			.mui-content-padded {
+				margin-top: 25px;
+			}
+			
+			.mui-btn {
+				padding: 10px;
+			}
+			
+			.mui-input-group>img {
+				width: 100%;
+				height: 300px;
+				border: 1px solid gainsboro;
+				margin-top: 3px;
+				margin-bottom: 3px;
+			}
+			
+			.mui-icon-plusempty {
+				width: 100%;
+				height: 300px;
+				border: 1px solid gainsboro;
+				color: gainsboro;
+				font-size: 300px;
+				font-weight: 400;
+				margin-top: 0px;
+			}
+		</style>
+
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">装箱单预录</h1>
+			<a href="#picture" class="mui-btn mui-btn-nav mui-pull-right">选择图片</a>
+
+		</header>
+		<div class="mui-content" id="content">
+			<form v-cloak>
+				<div class="mui-input-group" style="text-align: center;padding-top: 0px;" ref='form'>
+					<img v-bind:src="imagePath" v-if="imagePath" style="" />
+					<a href="#picture" v-else> <span class="mui-icon mui-icon-plusempty" style="" /></a>
+				</div>
+				<div class="mui-content-padded">
+					<button type="button" class="mui-btn mui-btn-block mui-btn-primary" v-on:tap='send'>提交</button>
+				</div>
+				
+				<div id="picture" class="mui-popover mui-popover-action mui-popover-bottom">
+					<ul class="mui-table-view">
+						<li class="mui-table-view-cell">
+							<a href="#" v-on:tap="take">拍照</a>
+						</li>
+						<li class="mui-table-view-cell">
+							<a href="#" v-on:tap="pick">相册</a>
+						</li>
+					</ul>
+					<ul class="mui-table-view">
+						<li class="mui-table-view-cell">
+							<a href="#picture"><b>取消</b></a>
+						</li>
+					</ul>
+				</div>
+				<div id="payment" class="mui-popover mui-popover-action mui-popover-bottom">
+					<ul class="mui-table-view">
+						<li class="mui-table-view-cell">
+							<a href="#" v-on:tap="take">余额支付</a>
+						</li>
+						<li class="mui-table-view-cell">
+							<a href="#" v-on:tap="wxpay">微信支付</a>
+						</li>
+					</ul>
+					<ul class="mui-table-view">
+						<li class="mui-table-view-cell">
+							<a href="#picture"><b>取消</b></a>
+						</li>
+					</ul>
+				</div>
+			</form>
+		</div>
+		<script src="js/vue.min.js"></script>
+		<script src="js/mui.min.js"></script>
+		<script src="js/common/common.js"></script>
+		<script src="js/common/compress-image.js"></script>
+		<script src="js/common/model.js"></script>
+		<script>
+			var vue = new Vue({
+				el: '#content',
+				data: {
+					user: null,
+					imagePath: null,
+					pays: {}
+				},
+				created: function() {},
+				mounted: function() {
+					mui.init();
+
+					mui('.mui-popover').on('tap', 'li', function() {
+						mui("#picture").popover("hide");
+					});
+
+					mui.plusReady(function() {
+						plus.payment.getChannels(function(channels) {
+							for(var i in channels) {
+								var channel = channels[i];
+								if(channel.id == 'qhpay' || channel.id == 'qihoo') { // 过滤掉不支持的支付通道：暂不支持360相关支付
+									continue;
+								}
+								vue.pays[channel.id] = channel;
+							}
+						}, function(e) {
+							mui.toast('获取支付通道失败：' + e.message);
+						});
+					});
+				},
+				methods: {
+					initData: function() {},
+					take: function() {
+
+						if(!window.plus) {
+							return mui.toast('系统准备中，请稍等...');
+						}
+
+						var cmr = plus.camera.getCamera();
+						cmr.captureImage(function(path) {
+							plus.io.resolveLocalFileSystemURL(path, function(entry) {
+								var localPath = entry.toLocalURL();
+								//								uploadImage(localPath);
+								//console.log(localPath)
+								vue.imagePath = localPath;
+
+							});
+						}, function(e) {
+							mui.toast("取消拍照");
+						}, {
+							filename: "_doc/gallery/",
+							index: 1
+						});
+					},
+					pick: function() {
+						if(!window.plus) {
+							return mui.toast('系统准备中，请稍等...');
+						}
+						plus.gallery.pick(function(path) {
+							//							uploadImage(path);
+							vue.imagePath = path;
+						}, function(e) {
+							mui.toast("取消选择图片");
+						}, {
+							filter: "image",
+							multiple: false
+						});
+					},
+					wxpay: function() {
+						Util.ajaxWithLoading('/pl/unifiedorder', {}, function(result) {
+							if(!result.isSuccess) {
+								return mui.toast(result.reason);
+							}
+							console.log(vue.pays['wxpay'])
+							console.log(JSON.stringify(result.data));
+							
+							mui.alert(JSON.stringify(result.data),'',function(){
+								plus.payment.request(vue.pays['wxpay'], JSON.stringify(result.data), function(result) {
+								console.log(JSON.stringify(result));
+								mui.alert('支付成功', '电子装箱单预录', function() {
+									mui.back();
+								});
+								}, function(e) {
+									console.log('----- 支付失败 -----');
+									mui.alert('[' + e.code + ']：' + e.message);
+//									plus.nativeUI.alert('更多错误信息请参考支付(Payment)规范文档：http://www.html5plus.org/#specification#/specification/Payment.html', null, '支付失败：' + e.code);
+								});
+							})
+							
+						})
+						
+					},
+					send: function() {
+
+						if(!this.imagePath) {
+							return mui.toast('请上传装箱单图片');
+						}						
+
+						mui.confirm('是否确认提交?', '提示', ['取消', '确定'], function(e) {
+							if(e.index !== 1) {
+								return;
+							}
+
+//							mui('#payment').popover('toggle');
+//
+//							return;
+
+							Util.compressImage(vue.imagePath, function(data) {
+								Util.ajaxWithLoading('/pl/add', {
+									ImageData: data
+								}, function(result) {
+									if(!result.isSuccess) {
+										return mui.toast(result.reason);
+									}
+
+									if(window.plus) {
+										mui.fire(plus.webview.getWebviewById('pl_prerecord_list.html'), 'addPLPR', {
+											data: result.data
+										});
+									}
+
+									mui.toast('下单成功');
+									Util.setData('payInfo',{orderNo:result.data.PLNo,amount:result.data.Fee});
+									
+									mui.openWindow('pay.html');
+									
+									
+								});
+							});
+
+						});
+					}
+				}
+			});
+		</script>
+
+	</body>
+
+</html>

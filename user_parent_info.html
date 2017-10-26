@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="stylesheet" href="css/mui.min.css">
+		<link rel="stylesheet" href="css/global.css" />
+
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<button type="button" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left mui-action-back" id="btnBack">
+					<span class="mui-icon mui-icon-left-nav"></span>
+				</button>
+			<h1 id="title" class="mui-title">我的经纪人</h1>
+		</header>
+		<div class="mui-content" id="content">
+
+			<form v-cloak>
+				<div class="mui-input-group">
+					<div class="mui-input-row">
+						<label>姓名</label>
+						<label class="mui-input">{{user.Parent.Name}}</label>
+					</div>
+					<div class="mui-input-row">
+						<label>手机号</label>
+						<label class="mui-input">{{user.Parent.Mobile}}</label>
+					</div>
+					<div class="mui-input-row">
+						<label>公司</label>
+						<label class="mui-input">{{user.Parent.CompanyName}}</label>
+					</div>
+				</div>
+			</form>
+
+
+		</div>
+	</body>
+		
+		<script src="js/vue.min.js"></script>
+
+	<script src="js/mui.min.js"></script>
+	<script src="js/mui.pullToRefresh.js"></script>
+	<script src="js/mui.pullToRefresh.material.js"></script>
+
+	<script src="js/common/model.js"></script>
+	<script src="js/common/vue-model-format.js"></script>
+	<script src="js/common/common.js"></script>
+
+	<script src="js/plugins/moment/moment-with-locales.min.js"></script>
+	<script src="js/plugins/linq/linq.min.js"></script>
+
+	<script type="text/javascript">
+		var vue = new Vue({
+			el: '#content',
+			data: {
+				user: {
+					Parent:{}
+				},
+
+			},
+			created:function(){
+				if(!mui.os.plus) {
+						this.user = Util.getData('user');
+					}
+			},
+			mounted:function(){
+				mui.plusReady(function() { //5+ iOS暂时无法屏蔽popGesture时传递touch事件，故该demo直接屏蔽popGesture功能
+						vue.user = Util.getData('user');
+
+						window.addEventListener('dataChanged', function(e) {
+							if(e.detail.key === 'user') {
+								vue.user = e.detail.data;
+							}
+						});
+					});
+			},
+			methods: {
+				formatDateTime: function(time) {
+					return moment(time).format('YYYY-MM-DD HH:mm');
+				}
+			}
+
+		});
+	</script>
+
+
+	
+</html>

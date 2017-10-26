@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="stylesheet" href="css/mui.min.css">
+		<link rel="stylesheet" href="css/mui.pullrefresh.css">
+		<link rel="stylesheet" href="css/global.css" />
+
+		<style>
+			
+			.mui-table-view-cell:after {
+				right: 10px;
+				left: 10px;
+			}
+			
+			.pl-data span {
+				display: inline-block;
+				color: #0062cc;
+			}
+			
+		</style>
+	</head>
+
+	<body style="overflow: hidden;">
+		<header class="mui-bar mui-bar-nav">
+			<button type="button" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left" id="btnBack">
+					<span class="mui-icon mui-icon-left-nav"></span>
+				</button>
+			<h1 id="title" class="mui-title">装箱单</h1>
+			<button class="mui-right mui-btn mui-btn-nav mui-pull-right" id="btnRecord">
+						预录
+			</button>
+		</header>
+		<div class="mui-content" id="content" style="position: absolute;top:44px;bottom:0px;width: 100%;">
+
+			<div class="mui-scroll-wrapper" id="divData" v-cloak>
+				<ul class="mui-table-view mui-scroll">
+					<li class="mui-table-view-cell" v-for="(pl,index) in SortPLs" v-on:tap="liTopicClick(pl)">
+						<div>
+							{{pl.PLNo}}<label style="position: absolute; right: 10px;">{{formatPLPRStatus(pl.StatusId)}}</label>
+							<div class="pl-data" v-if="isComplete(pl)">
+								<span>进箱码头:</span>{{pl.FormatContent['进箱码头']}}<br />
+								<span>箱号/封志号:</span>{{pl.FormatContent['箱号']}},{{pl.FormatContent['封志号']}}<br />
+								<span>箱型/箱皮重:</span>{{pl.FormatContent['箱型']}},{{pl.FormatContent['箱皮重']}}<br />
+								<span>箱经营人:</span>{{pl.FormatContent['箱经营人']}}<br />
+								<span>提单号数量:</span>{{pl.FormatContent.details.length}}
+							</div>
+							
+							<p>{{formatDateTime(pl.CreateTime)}}</p>
+						</div>
+					</li>
+				</ul>
+			</div>
+
+		</div>
+	</body>
+	<script src="js/vue.min.js"></script>
+
+	<script src="js/mui.min.js"></script>
+	<script src="js/mui.poppicker.js"></script>
+	<script src="js/mui.dtpicker.min.js"></script>
+	<script src="js/mui.pullToRefresh.js"></script>
+	<script src="js/mui.pullToRefresh.material.js"></script>
+
+	<script src="js/mui.pullToRefresh.js"></script>
+	<script src="js/mui.pullToRefresh.material.js"></script>
+
+	<script src="js/common/model.js"></script>
+	<script src="js/common/vue-model-format.js"></script>
+	<script src="js/common/common.js"></script>
+
+	<script src="js/plugins/moment/moment-with-locales.min.js"></script>
+	<script src="js/plugins/linq/linq.min.js"></script>
+
+	<script type="text/javascript">
+		var vue = new Vue({
+			el: '#content',
+			data: {
+				pls: [],
+				pullRefresh: null
+			},
+			computed: {
+				SortPLs: function() {
+					var pls = Enumerable.From(this.pls);
+
+					return pls.OrderByDescending('s=>s.CreateTime').ToArray();
+				}
+			},
+			mounted: function() {
+				mui.init();
+				this.pullRefresh = mui('#divData').pullToRefresh({
+					down: {
+						callback: function() {
+							vue.pulldownRefresh();
+						}
+					},
+					up: {
+						contentinit: '下拉刷新',
+						contentdown: '下拉刷新',
+						callback: function() {
+							var self = this;
+							setTimeout(function() {
+								self.endPullUpToRefresh();
+							}, 1000);
+						}
+					}
+				})
+				
+				mui('.mui-scroll-wrapper').scroll();
+				
+				document.getElementById('btnBack').addEventListener('tap',function(){
+					mui.back();
+				});
+
+				mui.ready(function() {
+					vue.pullRefresh.pullDownLoading();
+				});
+				
+				mui.plusReady(function(){
+					mui.back=function(){
+						plus.webview.currentWebview().close();
+					};
+				});
+				
+				mui('header').on('tap','button',function(){
+
+					var href=this.getAttribute('href');
+					mui.openWindow(href,href);
+				})
+				
+				document.getElementById('btnRecord').addEventListener('tap',function(){
+					mui.openWindow({
+						url:'pl_prerecord.html',
+						id:'pl_prerecord.html',
+						createNew:true
+					});
+				});
+				
+				window.addEventListener('addPLPR', function(e) {
+					vue.pls.push(e.detail.data);
+				});
+				window.addEventListener('refresh', function(e) {
+					vue.pulldownRefresh();
+				});
+						
+
+			},
+			methods: {
+				formatDateTime: function(time) {
+					return moment(time).format('YYYY-MM-DD HH:mm');
+				},
+				formatPLPRStatus: function(statusId) {
+					return Model.PLPRStatusName[statusId];
+				},
+				pulldownRefresh: function(obj) {
+					Util.ajaxWithLoading('/pl/list', {
+					}, function(result) {
+						try{
+						vue.pullRefresh.endPullDownToRefresh();
+						}catch(e){}
+
+						
+						if(!result.isSuccess) {
+							return;
+						}
+
+						vue.pls = result.data;
+						
+						vue.pls.forEach(function(pl){
+							pl.FormatContent=vue.formatPLContent(pl);
+						});
+						
+						//							vue.pls=[]
+
+					});
+				},
+				formatPLContent: function(pl) {
+
+						var data = {
+							details: []
+						};
+						if(!pl.Content){
+							return data;
+						}
+						
+						var content = pl.Content.replace(/:|：/g, '');
+						
+
+						var get = function(txt, key, nextKey) {
+							var a = txt.split(key)[1];
+							if(!a){return '';}
+							return a.substring(0, a.indexOf(nextKey));
+						}
+
+						data['进箱码头'] = get(content, '进箱码头', '箱号');
+						data['箱号'] = get(content, '箱号', ' 箱型');
+						data['箱型'] = get(content, '箱型', ' 封志号');
+						data['封志号'] = get(content, '封志号', ' 船名');
+						data['船名'] = get(content, '船名', '航次');
+						data['航次'] = get(content, '航次', '箱经营人');
+						data['箱经营人'] = get(content, '箱经营人', ' 卸货港');
+						data['卸货港'] = get(content, '卸货港', ' 提单号');
+						data['总件数'] = get(content, '总件数', ' 总货重');
+						data['总货重'] = get(content, '总货重', ' 总尺码');
+						data['总尺码'] = get(content, '总尺码', ' 箱皮重');
+						data['箱皮重'] = get(content, '箱皮重', ' 总重');
+						data['总重'] = get(content, '总重', ' 港区');
+						data['港区'] = get(content, '港区', ' 开港时间');
+						data['开港时间'] = get(content, '开港时间 ', '截港时间 ');
+						data['截港时间'] = get(content, '截港时间 ', '船期信息');
+
+						var arr = content.split('提单号');
+						for(var i = 1; i < arr.length; i++) {
+							var detail = {};
+							detail['提单号'] = arr[i].substring(0, arr[i].indexOf(' '));
+							detail['交货地代码/全称'] = get(arr[i], '交货地代码/全称', ' 件数');
+							detail['件数'] = get(arr[i], '件数', ' 包装类型');
+							detail['包装类型'] = get(arr[i], '包装类型', ' 货重');
+							detail['货重'] = get(arr[i], '货重', ' 尺码');
+							detail['尺码'] = get(arr[i], '尺码', ' 货物描述');
+							detail['货物描述'] = get(arr[i], '货物描述', ' 唛头');
+							detail['唛头'] = get(arr[i], '唛头', ' ');
+
+							data.details.push(detail);
+						}
+						return data;
+				},
+				isComplete: function(pl) {
+						return pl.StatusId >= Model.PLPRStatus.已完成&&[Model.PLPRStatus.已取消,Model.PLPRStatus.已退单,Model.PLPRStatus.已退款].indexOf(pl.StatusId)<0;
+					},
+				pullupRefresh: function(obj) {
+
+					//						mui('#pullrefresh').pullRefresh().endPullupToRefresh(false); //参数为true代表没有更多数据了。
+				},
+				liTopicClick: function(pl) {
+
+					Util.setData('pl', pl);
+
+					mui.openWindow({
+						url:'pl_prerecord_detail.html',
+						id:'pl_prerecord_detail.html',
+//						createNew:true
+					});
+				},
+			}
+
+		});
+		
+		
+
+	</script>
+
+</html>

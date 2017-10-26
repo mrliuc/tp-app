@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="stylesheet" href="css/mui.min.css">
+		<link rel="stylesheet" href="css/mui.pullrefresh.css">
+		<link rel="stylesheet" href="css/mui.dtpicker.min.css">
+		<link rel="stylesheet" href="css/global.css" />
+
+		<style>
+			
+			.mui-table-view-cell:after {
+				right: 10px;
+				left: 10px;
+			}
+		</style>
+	</head>
+
+	<body style="overflow: hidden;">
+		<header class="mui-bar mui-bar-nav">
+			<button type="button" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left mui-action-back">
+					<span class="mui-icon mui-icon-left-nav"></span>
+				</button>
+			<h1 id="title" class="mui-title">我的经纪人</h1>
+		</header>
+		<div class="mui-content" id="content" style="position: absolute;top:0px;bottom:0px;width: 100%;">
+
+			<div class="mui-scroll-wrapper" style="position: absolute;top: 44px;bottom: 0px;width: 100%; " id="divData" v-cloak>
+				<ul class="mui-table-view mui-scroll">
+					<li class="mui-table-view-cell" v-for="(invite,index) in SortInvites">
+						<div>
+
+							<span style="position: absolute; right: 10px">
+								<button type="button" v-on:tap="updateInviteStatus(3,invite.Account.Account)" class="mui-btn mui-btn-warning">拒绝</button>
+								<button type="button" v-on:tap="updateInviteStatus(2,invite.Account.Account)" class="mui-btn mui-btn-primary">同意</button>
+							</span>
+							{{invite.Account.Name}}({{invite.Account.Mobile}})
+							<br/>{{invite.Account.CompanyName}}
+							<br/>{{formatDateTime(invite.CreateTime)}}
+							
+						</div>
+					</li>
+				</ul>
+			</div>
+
+		</div>
+	</body>
+	<script src="js/vue.min.js"></script>
+
+	<script src="js/mui.min.js"></script>
+	<script src="js/mui.pullToRefresh.js"></script>
+	<script src="js/mui.pullToRefresh.material.js"></script>
+
+	<script src="js/common/model.js"></script>
+	<script src="js/common/vue-model-format.js"></script>
+	<script src="js/common/common.js"></script>
+
+	<script src="js/plugins/moment/moment-with-locales.min.js"></script>
+	<script src="js/plugins/linq/linq.min.js"></script>
+
+	<script type="text/javascript">
+		var vue = new Vue({
+			el: '#content',
+			data: {
+				invites: [],
+				pullRefresh: null,
+			},
+			computed: {
+				SortInvites: function() {
+					return Enumerable.From(this.invites).OrderByDescending('s=>s.CreateTime').ToArray();
+				}
+			},
+			mounted: function() {
+				this.pullRefresh = mui('#divData').pullToRefresh({
+					down: {
+						callback: function() {
+							vue.pulldownRefresh();
+						}
+					},
+					up: {
+						contentinit: '下拉刷新',
+						contentdown: '下拉刷新',
+						callback: function() {
+							var self = this;
+							setTimeout(function() {
+								self.endPullUpToRefresh();
+							}, 1000);
+						}
+					}
+				})
+
+				mui('.mui-scroll-wrapper').scroll();
+
+
+				mui.ready(function() {
+
+					vue.pullRefresh.pullDownLoading();
+				});
+
+				document.getElementById('btnBack').addEventListener('tap', function() {
+					//							mui.openWindow('main.html')
+					mui.back();
+				});
+			},
+			methods: {
+				formatDateTime: function(time) {
+					return moment(time).format('YYYY-MM-DD HH:mm');
+				},
+				pulldownRefresh: function(obj) {
+					Util.ajaxWithLoading('/user/invites', {
+						Condition: this.condition
+					}, function(result) {
+						if(!result.isSuccess) {
+							return;
+						}
+
+						vue.invites = result.data;
+						//							vue.topics=[]
+						vue.pullRefresh.endPullDownToRefresh();
+					});
+				},
+				pullupRefresh: function(obj) {
+
+					//						mui('#pullrefresh').pullRefresh().endPullupToRefresh(false); //参数为true代表没有更多数据了。
+				},
+				updateInviteStatus:function(statusId,parentNo){
+					Util.ajaxWithLoading('/user/updateInviteStatus', {
+						StatusId: statusId,
+						ParentNo:parentNo
+					}, function(result) {
+						if(!result.isSuccess) {
+							return mui.toast(result.reason);
+						}
+						
+						var parent= Enumerable.From(vue.invites).Single('s=>s.ParentNo==="'+parentNo+'"');
+						var user=Util.getData('user');
+						user.Parent=parent.Account;
+						Util.setData('user',user);
+						
+						mui.toast('操作成功');
+						
+						return mui.back();
+					});
+				}
+			}
+
+		});
+	</script>
+
+</html>

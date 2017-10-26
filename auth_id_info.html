@@ -1,0 +1,265 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>91货车-身份认证</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<style>
+			.area {
+				margin: 20px auto 0px auto;
+			}
+			
+			.mui-input-group:first-child {
+				margin-top: 20px;
+			}
+			
+			.mui-input-group label {
+				width: 33%;
+				text-align: right;
+			}
+			
+			.mui-input-row label~input,
+			.mui-input-row label~select,
+			.mui-input-row label~textarea {
+				width: 67%;
+			}
+			
+			.mui-checkbox input[type=checkbox],
+			.mui-radio input[type=radio] {
+				top: 6px;
+			}
+			
+			.mui-content-padded {
+				margin-top: 25px;
+			}
+			
+			.mui-btn {
+				padding: 10px;
+			}
+		</style>
+
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">身份认证</h1>
+		</header>
+		<div class="mui-content" id="content">
+			<form v-on:submit.prevent="submit" v-cloak>
+				<div class="mui-input-group" ref='form' >
+					<div class="mui-input-row">
+						<label>真实姓名</label>
+						<input id='name' type="text" v-bind:disabled="!isCanEdit" ref="name" v-model="idInfo.Name" class="mui-input-clear mui-input" placeholder="请输入姓名" required>
+					</div>
+					<div class="mui-input-row">
+						<label>驾驶证号码</label>
+						<input type="text" ref="DLNo" v-bind:disabled="!isCanEdit" v-model="idInfo.DLNo" class="mui-input-clear mui-input" placeholder="请输入驾驶证号码" required>
+					</div>
+
+					<div class="mui-input-row" style="height: 106px;">
+						<label>驾驶证图片</label>
+						<div>
+							<a v-bind:href="isCanEdit?'#picture':'#'">
+								<img v-bind:src="idInfo.DLImage" v-if="idInfo.DLImage" style="width: 100px;height: 100px;border: 1px solid gainsboro;margin-top: 3px;margin-bottom: 3px;" />
+								<span v-else class="mui-icon mui-icon-plusempty" style="width: 100px;height: 100px;border: 1px solid gainsboro;color:gainsboro;font-size:100px;font-weight:100;margin-top: 3px;margin-bottom: 3px;" />
+							</a>
+						</div>
+
+					</div>
+					
+					<div class="mui-input-row" v-if="user&&user.IDAuthStatus!==0">
+						<label>状态</label>
+						<label style="text-align: left;padding-left: 0px;">{{AuthStatusName}}</label>
+					</div>
+				</div>
+				<div class="mui-content-padded" v-if="isCanEdit" >
+					<button class="mui-btn mui-btn-block mui-btn-primary" >提交审核</button>
+				</div>
+				<div class="mui-content-padded" v-if="!edit&&user&&user.IDAuthStatus===3">
+					<button type="button" v-on:tap="editClick" class="mui-btn mui-btn-block mui-btn-primary">编辑</button>
+				</div>
+
+				<div id="picture" class="mui-popover mui-popover-action mui-popover-bottom">
+					<ul class="mui-table-view">
+						<li class="mui-table-view-cell">
+							<a href="#" v-on:tap="take">拍照</a>
+						</li>
+						<li class="mui-table-view-cell">
+							<a href="#" v-on:tap="pick">相册</a>
+						</li>
+					</ul>
+					<ul class="mui-table-view">
+						<li class="mui-table-view-cell">
+							<a href="#picture"><b>取消</b></a>
+						</li>
+					</ul>
+				</div>
+			</form>
+		</div>
+		<script src="js/vue.min.js"></script>
+		<script src="js/mui.min.js"></script>
+		<script src="js/common/common.js"></script>
+		<script src="js/common/compress-image.js"></script>
+		<script src="js/common/model.js"></script>
+		<script>
+			var vue = new Vue({
+				el: '#content',
+				data: {
+					user:null,
+					idInfo:{
+						Name: null,
+						DLNo: null,
+						DLImage: null,
+						DLImageData: null
+					},
+					edit:false
+					
+				},
+				computed:{
+					AuthStatusName:function(){
+						return this.user?Model.AuthStatusName[this.user.IDAuthStatus]:null;
+					},
+					isCanEdit:function(){
+//						mui.toast(this.edit||(this.user&&this.user.IDAuthStatus===0));
+						return this.edit||(this.user&&this.user.IDAuthStatus===0);
+					}
+				},
+				created:function(){
+					if(!mui.os.plus) {
+						this.user = Util.getData('user');
+						this.idInfo.Name=this.user?this.user.Name:null;
+						this.initData();
+					}
+				},
+				mounted: function() {
+					mui.init();
+					
+					mui.plusReady(function(){
+						vue.user = Util.getData('user');
+						vue.idInfo.Name=vue.user?vue.user.Name:null;
+						
+					vue.initData();
+						
+					});
+
+					mui('.mui-popover').on('tap','li',function(){
+						mui("#picture").popover("hide");
+					})
+					
+				},
+				methods: {
+					initData:function(){
+						Util.ajaxWithLoading('/user/getIDInfo',{},function(result){
+							if(!result.isSuccess){
+								return mui.toast(result.reason);
+							}
+							
+							if(result.data){
+								
+								result.data.DLImage=Util.getURL('/UserImagePath/'+vue.user.Id+'/IDInfo/'+result.data.DLImage);
+								mui.extend(vue.idInfo,result.data);
+															}
+						});
+					},
+					take: function() {
+
+						if(!window.plus) {
+							return mui.toast('系统准备中，请稍等...');
+						}
+
+						var cmr = plus.camera.getCamera();
+						cmr.captureImage(function(path) {
+							plus.io.resolveLocalFileSystemURL(path, function(entry) {
+								var localPath = entry.toLocalURL();
+//								uploadImage(localPath);
+							vue.idInfo.DLImage=localPath;
+								
+							});
+						}, function(e) {
+							mui.toast("取消拍照");
+						}, {
+							filename: "_doc/gallery/",
+							index: 1
+						});
+					},
+					pick: function() {
+						if(!window.plus) {
+							return mui.toast('系统准备中，请稍等...');
+						}
+						plus.gallery.pick(function(path) {
+//							uploadImage(path);
+							vue.idInfo.DLImage=path;
+						}, function(e) {
+							mui.toast("取消选择图片");
+						}, {
+							filter: "image",
+							multiple: false
+						});
+					},
+					editClick:function(e){
+//						e.stopPropagation();
+//								vue.edit=true;
+						
+						if(window.plus){
+							plus.nativeUI.showWaiting();
+							setTimeout(function(){
+								vue.edit=true;
+								plus.nativeUI.closeWaiting();
+							},1000)
+						}else{
+							setTimeout(function(){
+								vue.edit=true;
+							},1000)
+						}
+							
+					},
+					submit:function(){
+						if(!this.idInfo.Name){
+							return mui.toast('请输入姓名');
+						}
+						
+						if(!this.idInfo.DLNo){
+							return mui.toast('请输入驾驶证号码');
+						}
+						
+						if(!this.idInfo.DLImage){
+							return mui.toast('请上传驾驶证图片');
+						}
+						
+						mui.confirm('是否确认提交审核?','提示',['取消','确定'],function(e){
+							if(e.index!==1){
+								return;
+							}
+							
+//							if(window.plus){
+//								plus.nativeUI.showWaiting('正在提交...');
+//							}
+							
+							Util.compressImage(vue.idInfo.DLImage,function(base64){
+								vue.idInfo.DLImageData=base64;
+								Util.ajaxWithLoading('/user/authIDInfo',vue.idInfo,function(result){
+									if(!result.isSuccess){
+										return mui.toast(result.reason);
+									}
+									
+									vue.user.Name=vue.idInfo.Name;
+									
+									Util.setData('user',vue.user);
+									
+									mui.toast('提交成功');
+									mui.back();
+								});
+							});
+							
+						});
+					}
+				}
+			});
+		</script>
+
+	</body>
+
+</html>

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="stylesheet" href="css/mui.min.css">
+		<link rel="stylesheet" href="css/mui.pullrefresh.css">
+		<link rel="stylesheet" href="css/mui.dtpicker.min.css">
+		<link rel="stylesheet" href="css/global.css" >
+
+		<style>
+			.menu {
+				width: 100%;
+				text-align: center;
+				color: #000000;
+			}
+			
+			.menu .mui-icon {
+				position: absolute;
+				right: 3px;
+				padding: 0px;
+				margin: 0px;
+				height: 100%;
+				line-height: 30px;
+				color: #000000;
+			}
+			
+			span.mui-icon {
+				font-size: 14px;
+				color: #007aff;
+				margin-left: -15px;
+				padding-right: 10px;
+			}
+			
+			.menu-row {
+				padding: 5px 0px 5px 0px;
+				height: 40px;
+				width: 100%;
+				/*position: absolute;*/
+				z-index: 11;
+				-webkit-transform: translateZ(15)
+			}
+			
+			.menu-col {
+				line-height: 30px;
+				text-align: center;
+				border-right: 1px solid gainsboro;
+			}
+			
+			.mui-backdrop {
+				display: none;
+			}
+			
+			.date-input {
+				font-size: 14px;
+				font-weight: 400;
+				line-height: 1.42;
+				position: relative;
+				display: inline-block;
+				margin-bottom: 0;
+				padding: 6px 12px 6px;
+				cursor: pointer;
+				-webkit-transition: all;
+				transition: all;
+				-webkit-transition-timing-function: linear;
+				transition-timing-function: linear;
+				-webkit-transition-duration: .2s;
+				transition-duration: .2s;
+				vertical-align: top;
+				white-space: nowrap;
+				color: #333;
+				border: 1px solid #ccc;
+				border-radius: 3px;
+				border-top-left-radius: 3px;
+				border-top-right-radius: 3px;
+				border-bottom-right-radius: 3px;
+				border-bottom-left-radius: 3px;
+				background-color: #fff;
+				background-clip: padding-box;
+			}
+			
+			span.icon-clear {
+				position: absolute;
+				right: 15px;
+				top: 0px;
+				height: 100%;
+				padding-top: 10px;
+				text-align: center;
+			}
+			
+			#popMore {
+				padding-bottom: 10px;
+			}
+			
+			#popMore .mui-col {
+				text-align: center;
+			}
+			
+			#popOrderType,
+			#popContainer,
+			#popDistrict {
+				text-align: center;
+				width: 100px;
+			}
+			
+			.mui-table-view-cell:after {
+				right: 10px;
+				left: 10px;
+			}
+		</style>
+	</head>
+
+	<body style="overflow: hidden;">
+		<header class="mui-bar mui-bar-nav">
+			<button type="button" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left mui-action-back" >
+					<span class="mui-icon mui-icon-left-nav"></span>
+				</button>
+			<h1 id="title" class="mui-title">我的订单</h1>
+		</header>
+		<div class="mui-content" id="content" style="position: absolute;top:0px;bottom:0px;width: 100%;">
+			<div class="mui-row menu-row" id="divMenu">
+						<div class="mui-col mui-col-xs-3 menu-col" target-id="popDistrict">
+							<a href="#" class="menu">{{condition.District||'区域'}} <span class="mui-icon mui-icon-arrowdown" style=""></span></a>
+						</div>
+						
+						<div class="mui-col mui-col-xs-3 menu-col" target-id="popOrderType">
+
+							<!--<a href="#popOrderType" class="menu"><span style="display: block;width: 100%;; height: 100%;">{{Condition_OrderTypeName||'进出口'}} <span class="mui-icon mui-icon-arrowdown" style=""></span></span></a>-->
+							<a href="#" class="menu">{{Condition_OrderTypeName||'进出口'}} <span class="mui-icon mui-icon-arrowdown" style=""></span></a>
+
+						</div>
+						<div class="mui-col mui-col-xs-3 menu-col" target-id="popContainer">
+							<a href="#" class="menu">{{condition.ContainerType?(condition.ContainerType+'&times'+condition.ContainerQuantity):'箱型'}} <span class="mui-icon mui-icon-arrowdown" style=""></span></a>
+
+						</div>
+						
+						<div class="mui-col mui-col-xs-3 menu-col" target-id="popMore">
+							<a href="#" class="menu">更多 <span class="mui-icon mui-icon-arrowdown" style=""></span></a>
+
+						</div>
+
+					</div>
+					<div id="popOrderType" class="mui-popover">
+						<div class="mui-popover-arrow"></div>
+						<ul class="mui-table-view">
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.OrderType=null">全部</a>
+							</li>
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.OrderType=2">进口整箱</a>
+							</li>
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.OrderType=4">出口整箱</a>
+							</li>
+						</ul>
+
+					</div>
+
+					<div id="popContainer" class="mui-popover">
+						<ul class="mui-table-view">
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.ContainerType=null;condition.ContainerQuantity=0">全部</a>
+							</li>
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.ContainerType='20GP';condition.ContainerQuantity=1">20GP&times;1</a>
+							</li>
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.ContainerType='20GP';condition.ContainerQuantity=2">20GP&times;2</a>
+							</li>
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.ContainerType='40GP';condition.ContainerQuantity=1">40GP&times;1</a>
+							</li>
+						</ul>
+
+					</div>
+
+					<div id="popDistrict" class="mui-popover">
+						<ul class="mui-table-view">
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.District=null;">全部</a>
+							</li>
+							<li class="mui-table-view-cell" v-for="district in Districts">
+								<a href="#" v-on:tap="condition.District=district;">{{district}}</a>
+							</li>
+						</ul>
+
+					</div>
+
+					<div id="popMore" class="mui-popover">
+
+						<h5 class="mui-content-padded">提货日期</h5>
+						<div class="mui-input-row">
+
+							<div class="mui-col mui-col-sm-12 mui-col-xs-12" style="padding: 0px 10px 0px 8px;">
+								<input class="date-input" readonly v-on:click="pickDate" style="width: 100%;" v-bind:value="condition.PickupTime===null?'':condition.PickupTime+' '+condition.AMPM" placeholder="选择日期" />
+								<span class="mui-icon mui-icon-clear icon-clear" v-on:tap="clearDate"></span>
+							</div>
+						</div>
+						<h5 class="mui-content-padded">重量</h5>
+						<div class="mui-row">
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.TotalWeight===null?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.TotalWeight=null">全部</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.TotalWeight==='<=15T'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.TotalWeight='<=15T'"><=15T</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.TotalWeight==='>15T'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.TotalWeight='>15T'">>15T</button>
+							</div>
+						</div>
+						<h5 class="mui-content-padded">提箱点</h5>
+						<div class="mui-row">
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.PickupPoint===null?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.PickupPoint=null">全部</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.PickupPoint==='外港'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.PickupPoint='外港'">外港</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.PickupPoint==='洋山'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.PickupPoint='洋山'">洋山</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.PickupPoint==='浦西'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.PickupPoint='浦西'">浦西</button>
+							</div>
+						</div>
+						<h5 class="mui-content-padded">还箱点</h5>
+						<div class="mui-row">
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.ReturnPoint===null?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.ReturnPoint=null">全部</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.ReturnPoint==='外港'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.ReturnPoint='外港'">外港</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.ReturnPoint==='洋山'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.ReturnPoint='洋山'">洋山</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.ReturnPoint==='浦西'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.ReturnPoint='浦西'">浦西</button>
+							</div>
+						</div>
+
+					</div>
+
+			<div class="mui-scroll-wrapper" style="margin-top: 83px;"  id="divData" v-cloak>
+				<ul class="mui-table-view mui-scroll">
+					<li class="mui-table-view-cell" v-for="(topic,index) in SortTopics" v-on:tap="liTopicClick(topic)">
+						<div>
+				
+							{{formatDateTime(topic.PickupTime)}}<span v-if="topic.Status&&topic.Status.UserId!==topic.ReceiverUserId" class="mui-badge mui-badge-success" style="margin-left: 10px;">客户</span>
+							<span style="position: absolute; right: 10px">{{formatOrderType(topic.OrderType)}}</span>
+							<br />{{topic.PickupPoint}}/{{topic.ReturnPoint}}，{{topic.TotalWeight}}KG，&yen;{{topic.Freight}}
+							<br /><span style="margin-right: 10px" v-for="container in topic.Containers">{{container.ContainerType}}&times;{{container.Quantity}}</span>&nbsp;&nbsp;{{topic.SpecialRequirements}}
+							<br />{{topic.ContactName}},{{topic.ContactPhone}}
+							<br/>{{topic.FullAddress}}
+						</div>
+					</li>
+				</ul>
+			</div>
+
+		</div>
+	</body>
+	<script src="js/vue.min.js"></script>
+
+	<script src="js/mui.min.js"></script>
+	<script src="js/mui.picker.js"></script>
+	<script src="js/mui.poppicker.js"></script>
+	<script src="js/mui.dtpicker.min.js"></script>
+	<script src="js/mui.pullToRefresh.js"></script>
+	<script src="js/mui.pullToRefresh.material.js"></script>
+
+	<script src="js/common/model.js"></script>
+	<script src="js/common/vue-model-format.js"></script>
+	<script src="js/common/common.js"></script>
+
+	<script src="js/plugins/moment/moment-with-locales.min.js"></script>
+	<script src="js/plugins/linq/linq.min.js"></script>
+
+	<script type="text/javascript">
+		var vue = new Vue({
+			el: '#content',
+			data: {
+				condition: {
+					PickupTime: null,
+					AMPM: null,
+					OrderType: null,
+					ContainerType: null,
+					PickupPoint: null,
+					ReturnPoint: null,
+					TotalWeight: null,
+					City: null,
+					District: null,
+					StatusId: null,
+					ReceiverUserId: true
+				},
+				topics: [],
+				pullRefresh: null,
+				dtpocker: null
+			},
+			computed: {
+				SortTopics: function() {
+					var topics = Enumerable.From(this.topics);
+
+					if(this.condition.City ) {
+							topics = topics.Where("s=>s.City==='" + this.condition.City + "'");
+						}
+						if( this.condition.District){
+							topics = topics.Where("s=>s.District==='" + this.condition.District + "'");
+						}
+
+					return topics.OrderByDescending('s=>s.CreateTime').ToArray();
+				},
+				Condition_OrderTypeName: function() {
+					return this.formatOrderType(this.condition.OrderType);
+				},
+				Districts:function(){
+						var topics = Enumerable.From(this.topics);
+						
+						return topics.Select('s=>s.District').Distinct().ToArray();
+					}
+			},
+			watch: {
+				condition: {
+					handler: function() {
+						this.pullRefresh.pullDownLoading();
+					},
+					deep: true
+				}
+			},
+			mounted: function() {
+				this.pullRefresh = mui('#divData').pullToRefresh({
+					down: {
+						callback: function() {
+							vue.pulldownRefresh();
+						}
+					},
+					up: {
+						contentinit: '下拉刷新',
+						contentdown: '下拉刷新',
+						callback: function() {
+							var self = this;
+							setTimeout(function() {
+								self.endPullUpToRefresh();
+							}, 1000);
+						}
+					}
+				})
+
+				document.getElementById('divData').addEventListener('tap', function() {
+					mui('.mui-popover').popover('hide');
+
+				})
+				mui('.mui-scroll-wrapper').scroll();
+
+				mui('.mui-popover').on('tap', '.mui-table-view-cell', function() {
+					mui('.mui-popover').popover('hide');
+				});
+				
+				mui('#divMenu').on('tap', '.mui-col', function(e) {
+						mui('#' + this.getAttribute('target-id')).popover('toggle', this);
+					});
+
+				mui('#divData')[0].addEventListener('tap', function() {
+					if(vue.dtpicker) {
+						vue.dtpicker.dispose();
+						vue.dtpicker = null;
+					}
+				});
+
+				mui.ready(function() {
+
+					vue.pullRefresh.pullDownLoading();
+				});
+
+			},
+			methods: {
+				clearDate: function() {
+					this.condition.PickupTime = null;
+					this.condition.AMPM = null;
+				},
+				pickDate: function(e) {
+					var options = {
+						"type": "hour",
+						"beginDate": new Date(),
+						"endDate": moment().add(3, 'month').toDate(),
+						"customData": {
+							"h": [{
+									value: "全天",
+									text: "全天"
+								}, {
+									value: "上午",
+									text: "上午"
+								},
+								{
+									value: "下午",
+									text: "下午"
+								},
+							]
+						}
+					};
+
+					this.dtpicker = new mui.DtPicker(options);
+					this.dtpicker.show(function(rs) {
+						vue.condition.PickupTime = moment(new Date(rs.y.value, rs.m.value - 1, rs.d.value)).format('YYYY-MM-DD');
+						vue.condition.AMPM = rs.h.value;
+
+						vue.dtpicker.dispose();
+						vue.dtpicker = null;
+					});
+
+				},
+				formatDateTime: function(time) {
+					return moment(time).format('YYYY-MM-DD HH:mm');
+				},
+				formatOrderType: function(orderType) {
+					return Model.OrderTypeName[orderType];
+				},
+				pulldownRefresh: function(obj) {
+					Util.ajaxWithLoading('/topic/receivelist', {
+						Condition: this.condition
+					}, function(result) {
+						if(!result.isSuccess) {
+							return;
+						}
+
+						vue.topics = result.data;
+						//							vue.topics=[]
+						vue.pullRefresh.endPullDownToRefresh();
+					});
+				},
+				pullupRefresh: function(obj) {
+
+					//						mui('#pullrefresh').pullRefresh().endPullupToRefresh(false); //参数为true代表没有更多数据了。
+				},
+				liTopicClick: function(topic) {
+
+					Util.setData('topic', topic);
+
+					mui.openWindow('topic_detail.html', 'topic_detail.html')
+				},
+			}
+
+		});
+	</script>
+
+</html>

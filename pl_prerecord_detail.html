@@ -1,0 +1,806 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>装箱单预录</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link href="css/mui-preview.css" rel="stylesheet" />
+		<link href="css/global.css" rel="stylesheet" />
+		<style>
+			.pl-data {
+				margin-top: 10px;
+			}
+			
+			.pl-data span {
+				display: inline-block;
+				width: 40%;
+				text-align: right;
+				padding-top: 5px;
+				padding-right: 5px;
+				color: #0062cc;
+			}
+			
+			.pl-summary span {
+				display: inline-block;
+				width: 30%;
+				text-align: right;
+				padding-top: 5px;
+				padding-right: 5px;
+				color: #0062cc;
+			}
+			
+			.pl-summary .title {
+				color: #0062cc;
+			}
+			
+			.pl-summary,.pl-data{
+				padding: 0px 10px;
+			}
+			.line {
+				display: block;
+				border: dashed gainsboro 1px;
+			}
+			
+			footer {
+				position: fixed;
+				width: 100%;
+				height: 50px;
+				min-height: 50px;
+				border-top: solid 1px #bbb;
+				left: 0px;
+				bottom: 0px;
+				overflow: hidden;
+				padding: 0px 50px 0px 10px;
+				background-color: #fafafa;
+			}
+			
+			.footer-left {
+				position: absolute;
+				width: 50px;
+				height: 50px;
+				left: 0px;
+				bottom: 0px;
+				text-align: center;
+				vertical-align: middle;
+				line-height: 100%;
+				padding: 12px 4px;
+			}
+			
+			.footer-right {
+				position: absolute;
+				width: 50px;
+				height: 50px;
+				right: 0px;
+				bottom: 0px;
+				text-align: center;
+				vertical-align: middle;
+				line-height: 100%;
+				padding: 12px 5px;
+				display: inline-block;
+			}
+			
+			.footer-center {
+				height: 100%;
+				padding: 5px 0px;
+			}
+			
+			.footer-center [class*=input] {
+				width: 100%;
+				height: 100%;
+				border-radius: 5px;
+			}
+			
+			.footer-center .input-text {
+				background: #fff;
+				border: solid 1px #ddd;
+				padding: 10px !important;
+				font-size: 16px !important;
+				line-height: 18px !important;
+				font-family: verdana !important;
+				overflow: hidden;
+			}
+			
+			.footer-center .input-sound {
+				background-color: #eee;
+			}
+			
+			footer .mui-icon {
+				color: #000;
+			}
+			
+			footer .mui-icon:active {
+				color: #007AFF !important;
+			}
+			
+			footer .mui-icon-paperplane:before {
+				content: "发送";
+			}
+			
+			footer .mui-icon-paperplane {
+				/*-webkit-transform: rotateZ(45deg);
+				transform: rotateZ(45deg);*/
+				font-size: 16px;
+				word-break: keep-all;
+				line-height: 100%;
+				padding-top: 6px;
+				color: rgba(0, 135, 250, 1);
+			}
+			
+			#msg-list {
+				height: 100%;
+				overflow: auto;
+				-webkit-overflow-scrolling: touch;
+			}
+			
+			.msg-item {
+				padding: 8px;
+				clear: both;
+			}
+			
+			.msg-item .mui-item-clear {
+				clear: both;
+			}
+			
+			.msg-item .msg-user {
+				width: 38px;
+				height: 38px;
+				border: solid 1px #d3d3d3;
+				display: inline-block;
+				background: #fff;
+				border-radius: 3px;
+				vertical-align: top;
+				text-align: center;
+				float: left;
+				padding: 3px;
+				color: #ddd;
+			}
+			
+			.msg-item .msg-user-img {
+				width: 38px;
+				height: 38px;
+				display: inline-block;
+				border-radius: 3px;
+				vertical-align: top;
+				text-align: center;
+				float: left;
+				color: #ddd;
+			}
+			
+			.msg-item .msg-content {
+				display: inline-block;
+				border-radius: 5px;
+				border: solid 1px #d3d3d3;
+				background-color: #FFFFFF;
+				color: #333;
+				padding: 8px;
+				vertical-align: top;
+				font-size: 15px;
+				position: relative;
+				margin: 0px 8px;
+				max-width: 75%;
+				min-width: 35px;
+				float: left;
+			}
+			
+			.msg-item .msg-content .msg-content-inner {
+				overflow-x: hidden;
+			}
+			
+			.msg-item .msg-content .msg-content-arrow {
+				position: absolute;
+				border: solid 1px #d3d3d3;
+				border-right: none;
+				border-top: none;
+				background-color: #FFFFFF;
+				width: 10px;
+				height: 10px;
+				left: -5px;
+				top: 12px;
+				-webkit-transform: rotateZ(45deg);
+				transform: rotateZ(45deg);
+			}
+			
+			.msg-item-self .msg-user,
+			.msg-item-self .msg-content {
+				float: right;
+			}
+			
+			.msg-item-self .msg-content .msg-content-arrow {
+				left: auto;
+				right: -5px;
+				-webkit-transform: rotateZ(225deg);
+				transform: rotateZ(225deg);
+			}
+			
+			.msg-item-self .msg-content,
+			.msg-item-self .msg-content .msg-content-arrow {
+				background-color: #4CD964;
+				color: #fff;
+				border-color: #2AC845;
+			}
+			
+			.mui-scroll-wrapper {
+				/*margin-top: 45px;*/
+				margin-bottom: 55px;
+			}
+			
+			.mui-card .mui-control-content {
+				padding: 10px;
+			}
+			
+			.mui-control-content {
+				height: 100%;
+			}
+		</style>
+
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">装箱单预录明细</h1>
+
+		</header>
+		<div class="mui-content" id="content">
+			<div style="padding: 10px 10px;">
+				<div id="segmentedControl" class="mui-segmented-control">
+					<a v-bind:class="['mui-control-item',isComplete?'mui-active':'']" href="#item1">小票信息</a>
+					<a v-bind:class="['mui-control-item',!isComplete?'mui-active':'']" href="#item2">客服消息</a>
+				</div>
+			</div>
+			<div style="position: absolute;bottom: 0px;top: 100px;width: 100%;">
+				<div id="item1" v-bind:class="['mui-control-content',isComplete?'mui-active':'']">
+					<div class="mui-scroll-wrapper" v-bind:style={'margin-bottom':isConfirm?'0px':''}>
+						<ul class="mui-table-view">
+							<img v-bind:src="imagePath" style="width: 100%;height: 300px;" data-preview-src="" data-preview-group="1" />
+
+							<div class="mui-collapse-content" v-if="isComplete" v-cloak>
+
+								<div class="pl-summary">
+									<h5>小票摘要</h5>
+									<span>船名/航次:</span>{{PLContent['船名']}},{{PLContent['航次']}}<br />
+									<span>箱号/封志号:</span>{{PLContent['箱号']}},{{PLContent['封志号']}}<br />
+									<span>箱型/箱皮重:</span>{{PLContent['箱型']}},{{PLContent['箱皮重']}}<br />
+									<span>箱经营人:</span>{{PLContent['箱经营人']}}<br />
+									<span>卸货港:</span>{{PLContent['卸货港']}}
+									<div class="mui-row">
+										<div class="mui-col mui-col-xs-5 title">提单号</div>
+										<div class="mui-col mui-col-xs-2 title">件数</div>
+										<div class="mui-col mui-col-xs-3 title">货重</div>
+										<div class="mui-col mui-col-xs-2 title">尺码</div>
+									</div>
+									<div class="mui-row" v-for="detail in PLContent.details" style="font-size:14px">
+										<div class="mui-col mui-col-xs-5">{{detail['提单号']}}</div>
+										<div class="mui-col mui-col-xs-2">{{detail['件数']}}</div>
+										<div class="mui-col mui-col-xs-3">{{detail['货重']}}</div>
+										<div class="mui-col mui-col-xs-2">{{detail['尺码']}}</div>
+									</div>
+									<label class="line"></label>
+									<div class="mui-row" style="font-size:16px">
+										<div class="mui-col mui-col-xs-5">合计</div>
+										<div class="mui-col mui-col-xs-2">{{PLContent['总件数']}}</div>
+										<div class="mui-col mui-col-xs-3">{{PLContent['总货重']}}</div>
+										<div class="mui-col mui-col-xs-2">{{PLContent['总尺码']}}</div>
+									</div>
+								</div>
+
+								<div class="pl-data">
+									<h5>小票明细</h5>
+									<span>进箱码头:</span>{{PLContent['进箱码头']}}<br/>
+									<span>箱号:</span>{{PLContent['箱号']}}<br/>
+									<span>箱型:</span>{{PLContent['箱型']}}<br/>
+									<span>封志号:</span>{{PLContent['封志号']}}<br/>
+									<span>船名:</span>{{PLContent['船名']}}<br/>
+									<span>航次:</span>{{PLContent['航次']}}<br/>
+									<span>箱经营人:</span>{{PLContent['箱经营人']}}<br/>
+									<span>卸货港:</span>{{PLContent['卸货港']}}<br/>
+									<span>总件数:</span>{{PLContent['总件数']}}<br/>
+									<span>总货重:</span>{{PLContent['总货重']}}<br/>
+									<span>总尺码:</span>{{PLContent['总尺码']}}<br/>
+									<span>箱皮重:</span>{{PLContent['箱皮重']}}<br/>
+									<span>总重:</span>{{PLContent['总重']}}<br/>
+									<span>港区:</span>{{PLContent['港区']}}<br/>
+									<span>开港时间:</span>{{PLContent['开港时间']}}<br/>
+									<span>截港时间:</span>{{PLContent['截港时间']}}
+
+									<div v-for="detail in PLContent.details">
+										<label class="line"></label>
+										<span>提单号:</span>{{detail['提单号']}}<br/>
+										<span>交货地代码/全称:</span>{{detail['交货地代码/全称']}}<br/>
+										<span>件数:</span>{{detail['件数']}}<br/>
+										<span>包装类型:</span>{{detail['包装类型']}}<br/>
+										<span>货重:</span>{{detail['货重']}}<br/>
+										<span>尺码:</span>{{detail['尺码']}}<br/>
+										<span>货物描述:</span>{{detail['货物描述']}}<br/>
+										<span>唛头:</span>{{detail['唛头']}}
+
+									</div>
+
+								</div>
+								<div style="width: 100%;text-align: center;margin-top: 5px;">
+									<p>船期信息仅供参考如遇变动，以港区公告为准.
+										<p>
+											
+								</div>
+
+								
+						
+
+
+							</div>
+							<div class="mui-collapse-content" v-else>
+								<p>还没有收到小票信息，请注意客服消息</p>
+							</div>
+							</li>
+							
+						</ul>
+						
+						
+
+					
+
+					</div>
+					<div v-if="!isUnPay&&!isReceive&&!isCancel" style="height:50px;width: 100%;padding: 3px 50px;position:fixed;bottom: 0px;">
+							<button type="button" v-on:tap="cancel" class="mui-btn mui-btn-warning" style="height: 100%; width: 100%;">取消</button>
+						</div>
+						<div v-if="isComplete&&!isConfirm" style="height:50px;width: 100%;padding: 3px 50px;position:fixed;bottom: 0px;z-index: 99;">
+							<button type="button" v-on:tap="confirm" class="mui-btn mui-btn-warning" style="height: 100%; width: 100%;">确认</button>
+
+						</div>
+				</div>
+				<!--<div v-if="isComplete&&!isConfirm" style="height:50px;width: 100%;padding: 3px 50px;position:fixed;bottom: 0px;z-index: 99;">
+							<button type="button" v-on:tap="confirm" class="mui-btn mui-btn-warning" style="height: 100%; width: 100%;">确认</button>
+
+						</div>-->
+				
+				<div id="item2" v-bind:class="['mui-control-content',!isComplete?'mui-active':'']">
+					<div class="mui-scroll-wrapper" id="divWrapper" v-bind:style={'margin-bottom':isConfirm?'0px':''}>
+
+						<ul class="mui-table-view" style="margin-bottom: 50px;">
+							<div class="mui-collapse-content" style="padding-bottom: 50px;">
+
+								<div v-for="msg in plmsgs">
+									<div v-if="!isPLTypeUpdateStatus(msg.Type)" v-bind:class="['msg-item',msg.UserId?'msg-item-self':'']">
+										<i v-if="msg.UserId" class="msg-user mui-icon mui-icon-person"></i>
+										<img v-else class="msg-user-img" src="images/logo-min.png" alt="" />
+										<div class="msg-content">
+											<div class="msg-content-inner">
+												{{msg.Content}}
+											</div>
+											<div class="msg-content-arrow"></div>
+
+										</div>
+									</div>
+
+									<div v-else class="msg-item" style="text-align: center;">
+										<h6>系统消息：{{formatPLPRStatus(msg.Content)}}&nbsp;&nbsp;&nbsp;&nbsp;{{formatDateTime(msg.CreateTime)}}</h6>
+									</div>
+
+								</div>
+
+							</div>
+
+						</ul>
+
+						
+
+					</div>
+					<footer v-if="!isUnPay&&!isConfirm&&!isCancel">
+							<div class="footer-center">
+								<textarea id='msg-text' type="text" class='input-text' v-model="content" v-on:focus="focus"></textarea>
+							</div>
+							<label for="" class="footer-right">
+							<i id='msg-type' class="mui-icon mui-icon-paperplane" v-on:tap="sendMsg"></i>
+						</label>
+						</footer>
+				</div>
+			</div>
+
+						<div v-if="isUnPay" style="height:50px;width: 100%;padding: 3px 50px;position:fixed;bottom: 5px;text-align: center;">
+							<!--<button type="button" v-on:tap="cancel" class="mui-btn mui-btn-grey" style="height: 100%; width: 48%;">取消</button>-->
+							<button type="button" v-on:tap="gotoPay" class="mui-btn mui-btn-warning" style="height: 100%; width: 100%;">立即支付</button>
+						</div>
+		</div>
+
+		<script src="js/vue.min.js"></script>
+		<script src="js/mui.min.js"></script>
+		<script src="js/mui.zoom.js"></script>
+		<script src="js/mui.previewimage.js"></script>
+		<!--<script src="js/mui.imageViewer.js"></script>-->
+		<script src="js/common/common.js"></script>
+		<script src="js/common/compress-image.js"></script>
+		<script src="js/common/model.js"></script>
+		<script src="js/plugins/moment/moment-with-locales.min.js"></script>
+		<script src="js/plugins/linq/linq.min.js"></script>
+
+		<script>
+			var vue = new Vue({
+				el: '#content',
+				data: {
+					pl: {},
+					plmsgs: [],
+					content: null,
+					isShowMsgInput: false
+				},
+				computed: {
+					imagePath: function() {
+						return Util.getURL('/PLImage/' + this.pl.UserId + '/' + this.pl.ImageName);
+					},
+					isUnPay: function() {
+						return this.pl.StatusId === Model.PLPRStatus.待付款;
+					},
+					isConfirm: function() {
+						return this.pl.StatusId === Model.PLPRStatus.已确认;
+					},
+					isComplete: function() {
+						return this.pl.StatusId >= Model.PLPRStatus.已完成&&!this.isCancel;
+					},
+					isReceive: function() {
+						return this.pl.StatusId >= Model.PLPRStatus.已接单&&!this.isCancel;
+					},
+					isCancel:function(){
+						return [Model.PLPRStatus.已取消,Model.PLPRStatus.已退单,Model.PLPRStatus.已退款].indexOf(this.pl.StatusId)>=0;
+					},
+					PLContent: function() {
+
+						var data = {
+							details: []
+						};
+						if(!this.pl.Content){
+							return data;
+						}
+						
+						var content = this.pl.Content.replace(/:|：/g, '');
+						
+
+						var get = function(txt, key, nextKey) {
+							if(txt.indexOf(key)<0){
+								return null;
+							}
+							var a = txt.split(key)[1];
+							return a.substring(0, a.indexOf(nextKey));
+						}
+
+						data['进箱码头'] = get(content, '进箱码头', '箱号');
+						data['箱号'] = get(content, '箱号', ' 箱型');
+						data['箱型'] = get(content, '箱型', ' 封志号');
+						data['封志号'] = get(content, '封志号', ' 船名');
+						data['船名'] = get(content, '船名', '航次');
+						data['航次'] = get(content, '航次', '箱经营人');
+						data['箱经营人'] = get(content, '箱经营人', ' 卸货港');
+						data['卸货港'] = get(content, '卸货港', ' 提单号');
+						data['总件数'] = get(content, '总件数', ' 总货重');
+						data['总货重'] = get(content, '总货重', ' 总尺码');
+						data['总尺码'] = get(content, '总尺码', ' 箱皮重');
+						data['箱皮重'] = get(content, '箱皮重', ' 总重');
+						data['总重'] = get(content, '总重', ' 港区');
+						data['港区'] = get(content, '港区', ' 开港时间');
+						data['开港时间'] = get(content, '开港时间 ', '截港时间 ');
+						data['截港时间'] = get(content, '截港时间 ', '船期信息');
+
+						var arr = content.split('提单号');
+						for(var i = 1; i < arr.length; i++) {
+							var detail = {};
+							detail['提单号'] = arr[i].substring(0, arr[i].indexOf(' '));
+							detail['交货地代码/全称'] = get(arr[i], '交货地代码/全称', ' 件数');
+							detail['件数'] = get(arr[i], '件数', ' 包装类型');
+							detail['包装类型'] = get(arr[i], '包装类型', ' 货重');
+							detail['货重'] = get(arr[i], '货重', ' 尺码');
+							detail['尺码'] = get(arr[i], '尺码', ' 货物描述');
+							detail['货物描述'] = get(arr[i], '货物描述', ' 唛头');
+							detail['唛头'] = get(arr[i], '唛头', ' ');
+
+							data.details.push(detail);
+						}
+						return data;
+					}
+				},
+				created: function() {
+					if(!mui.os.plus) {
+						this.pl = Util.getData('pl');
+						this.initData();
+					}
+				},
+				mounted: function() {
+					mui.init();
+
+					mui('.mui-popover').on('tap', 'li', function() {
+						mui("#picture").popover("hide");
+					})
+
+					mui.plusReady(function() { //5+ iOS暂时无法屏蔽popGesture时传递touch事件，故该demo直接屏蔽popGesture功能
+
+						vue.pl = Util.getData('pl');
+						vue.initData();
+
+					});
+
+					mui('.mui-scroll-wrapper').scroll();
+
+					window.addEventListener('pushReceive', function(e) {
+
+						var msg = e.detail.msg;
+
+						var data = Util.getData('pushReceiveData');
+
+						//						console.log(data)
+						//						console.log(msg)
+
+						if(data['__UUID__'] !== msg['__UUID__']) {
+							return;
+						}
+						var m = JSON.parse(msg.content);
+
+						if(vue.pl.PLNo !== m.data.PLNo) {
+							return;
+						}
+
+						if(Enumerable.From(vue.plmsgs).Any('s=>s.Id===' + m.data.Id)) {
+							return;
+						}
+
+						Util.setData('pushReceiveData', null);
+						
+						if(vue.isPLTypeUpdateStatus(m.data.Type)){
+							mui.fire(plus.webview.getWebviewById('pl_prerecord_list.html'), 'refresh',{} );
+						}
+						
+						vue.plmsgs.push(m.data);
+
+						if(window.plus && mui.os.android) {
+							var context = plus.android.runtimeMainActivity();
+							var RingtoneManager = plus.android.importClass('android.media.RingtoneManager');
+							var uri = RingtoneManager.getActualDefaultRingtoneUri(context, RingtoneManager.TYPE_NOTIFICATION);
+							plus.android.importClass(uri);
+							var p = plus.audio.createPlayer(uri.toString());
+							p.play(function() {
+								// alert( "Audio play success!" ); 
+							}, function(e) {
+								// alert( "Audio play error: " + e.message ); 
+							})
+						}
+
+						vue.scrollToBottom();
+
+						//						mui.toast(data['__UUID__']+'/'+msg['__UUID__']);
+
+						//						console.log(msg.content)
+
+					});
+
+					mui.previewImage();
+
+					//					this.isShowMsgInput= document.getElementById('divMsgList').className.indexOf('mui-active')<0;
+					//					document.getElementById('divMsgList').addEventListener('expand',function(){
+					//						vue.isShowMsgInput
+					//					})
+					//					mui('.mui-collapse').on('expend','.mui-navigate-right',this.triggleMsgList);
+
+				},
+				methods: {
+					initData: function() {
+						Util.ajaxWithLoading('/pl/detail', {
+							PLNo: this.pl.PLNo
+						}, function(result) {
+							if(!result.isSuccess) {
+								return mui.toast(result.reason);
+							}
+
+							vue.plmsgs = result.data;
+
+							vue.scrollToBottom();
+
+						});
+
+					},
+					isPLTypeUpdateStatus: function(type) {
+						return type === Model.PLType.更新状态;
+					},
+					formatDateTime: function(time) {
+						return moment(time).format('YYYY-MM-DD HH:mm');
+					},
+					formatPLPRStatus: function(content) {
+						return Model.PLPRStatusName[content];
+					},
+					focus: function() {
+						console.log(2)
+						//						mui('.mui-scroll-wrapper').scroll().scrollToBottom();
+
+					},
+					expand: function(isShow) {
+
+						this.isShowMsgInput = isShow;
+
+						if(this.isShowMsgInput) {
+							setTimeout(function() {
+								var a = document.getElementById('divWrapper').clientHeight - document.getElementById('divWrapper').scrollHeight;
+								mui('.mui-scroll-wrapper').scroll().scrollTo(0, a);
+							}, 100)
+						}
+					},
+					pick: function() {
+						if(!window.plus) {
+							return mui.toast('系统准备中，请稍等...');
+						}
+						plus.gallery.pick(function(path) {
+							//							uploadImage(path);
+							vue.imagePath = path;
+						}, function(e) {
+							mui.toast("取消选择图片");
+						}, {
+							filter: "image",
+							multiple: false
+						});
+					},
+					scrollToBottom: function() {
+						setTimeout(function() {
+							var a = document.getElementById('divWrapper').clientHeight - document.getElementById('divWrapper').scrollHeight;
+							if(a<0)
+							mui('#divWrapper').scroll().scrollTo(0, a + 50);
+						}, 100)
+					},
+					formatContent1: function(content) {
+
+						//						var content=content.substring(content.indexOf('进箱码头'),content.replace(/[\u0391-\uFFE5]/g,"aa").length-content.indexOf('进箱码头'));
+						//	var content = content.substring(content.indexOf('进箱码头'), content.indexOf('船期信息'));
+
+						//var aa=content.replace(/ /g,'');
+						var data = {
+							details: []
+						};
+
+						var get = function(txt, key, nextKey) {
+							var a = txt.split(key)[1];
+							
+							return a.substring(0, a.indexOf(nextKey));
+
+							
+
+						}
+
+						data['进箱码头'] = get(content, '进箱码头：', ' ');
+						data['箱号'] = get(content, '箱号：', ' ');
+						data['箱型'] = get(content, '箱型：', ' ');
+						data['封志号'] = get(content, '封志号：', ' ');
+						data['船名'] = get(content, '船名：', '航次：');
+						data['航次'] = get(content, '航次：', '箱经营人：');
+						data['箱经营人'] = get(content, '箱经营人：', ' ');
+						data['卸货港'] = get(content, '卸货港：', ' ');
+						data['总件数'] = get(content, '总件数：', ' ');
+						data['总货重'] = get(content, '总货重：', ' ');
+						data['总尺码'] = get(content, '总尺码：', ' ');
+						data['箱皮重'] = get(content, '箱皮重：', ' ');
+						data['总重'] = get(content, '总重：', ' ');
+						data['开港时间'] = get(content, '开港时间: ', '截港时间: ');
+						data['截港时间'] = get(content, '截港时间: ', '船期信息');
+
+						var arr = content.split('提单号：');
+						for(var i = 1; i < arr.length; i++) {
+							var detail = {};
+							detail['提单号'] = arr[i].substring(0, arr[i].indexOf(' '));
+							detail['交货地代码/全称'] = get(arr[i], '交货地代码/全称：', ' ');
+							detail['件数'] = get(arr[i], '件数：', ' ');
+							detail['包装类型'] = get(arr[i], '包装类型：', ' ');
+							detail['货重'] = get(arr[i], '货重：', ' ');
+							detail['尺码'] = get(arr[i], '尺码：', ' ');
+							detail['货物描述'] = get(arr[i], '货物描述：', ' ');
+							detail['唛头'] = get(arr[i], '唛头：', ' ');
+
+							data.details.push(detail);
+						}
+
+						content = content.replace(/进箱码头：/g, '<span>进箱码头：</span>')
+							.replace(/箱型：/g, '<span>箱型：</span>')
+							.replace(/箱号：/g, '<span>箱号：</span>')
+							.replace(/封志号：/g, '<span>封志号：</span>')
+							.replace(/船名：/g, '<span>船名：</span>')
+							.replace(/航次：/g, '<span>航次：</span>')
+							.replace(/箱经营人：/g, '<span>箱经营人：</span>')
+							.replace(/卸货港：/g, '<span>卸货港：</span>')
+							.replace(/提单号：/g, '<label class="line"></label><span>提单号：</span>')
+							.replace(/交货地代码\/全称：/g, '<span>交货地代码/全称：</span>')
+							.replace(/件数：/g, '<span>件数：</span>')
+							.replace(/包装类型：/g, '<span>包装类型：</span>')
+							.replace(/货重：/g, '<span>货重：</span>')
+							.replace(/尺码：/g, '<span>尺码：</span>')
+							.replace(/货物描述：/g, '<span>货物描述：</span>')
+							.replace(/唛头：/g, '<span>唛头：</span>')
+							.replace(/总件数：/g, '<span>总件数：</span>')
+							.replace(/总货重：/g, '<span>总货重：</span>')
+							.replace(/总尺码：/g, '<span>总尺码：</span>')
+							.replace(/箱皮重：/g, '<span>箱皮重：</span>')
+							.replace(/总重：/g, '<span>总重：</span>')
+							.replace(/开港时间:/g, '<span>开港时间：</span>')
+							.replace(/截港时间:/g, '<span>截港时间：</span>')
+							.replace(/<span>/g, '<br/><span>')
+							.replace('<br/>', '')
+							.replace(/<\/label><br\/>/g, '</label>');
+
+						//						content.split(' ').forEach(function(data) {
+						//	console.log(data)
+
+						//						})
+
+						return content;
+					},
+					cancel: function() {
+						mui.confirm('是否确认取消', '提示', ['取消', '确定'], function(e) {
+							if(e.index !== 1) {
+								return;
+							}
+
+							Util.ajaxWithLoading('/pl/cancel', {
+								PLNo: vue.pl.PLNo,
+							}, function(result) {
+								if(!result.isSuccess) {
+									return mui.toast(result.reason);
+								}
+								vue.content = null;
+								vue.plmsgs.push(result.data);
+								vue.pl.StatusId=Model.PLPRStatus.已取消;
+								
+								mui.fire(plus.webview.getWebviewById('pl_prerecord_list.html'), 'refresh',{} );
+								
+								mui.toast('取消成功，费用将在24小时之内退回');
+							});
+						});
+
+					},
+					gotoPay:function(){
+						console.log(this.pl.Fee);
+						Util.setData('payInfo',{orderNo:this.pl.PLNo,amount:this.pl.Fee});
+									
+						mui.openWindow('pay.html');
+					},
+					confirm: function() {
+						mui.confirm('是否确认?', '提示', ['取消', '确定'], function(e) {
+							if(e.index !== 1) {
+								return;
+							}
+
+							Util.ajaxWithLoading('/pl/confirm', {
+								PLNo: vue.pl.PLNo,
+							}, function(result) {
+								if(!result.isSuccess) {
+									return mui.toast(result.reason);
+								}
+								mui.fire(plus.webview.getWebviewById('pl_prerecord_list.html'), 'refresh',{} );
+								
+								mui.toast('操作成功')
+								vue.content = null;
+								vue.plmsgs.push(result.data);
+								vue.pl.StatusId=Model.PLPRStatus.已确认;
+
+							});
+						});
+
+					},
+					sendMsg: function() {
+
+						if(!this.content) {
+							return mui.toast('消息不能为空');
+						}
+
+						Util.ajaxWithLoading('/pl/msg', {
+							PLNo: this.pl.PLNo,
+							Content: this.content
+						}, function(result) {
+							if(!result.isSuccess) {
+								return mui.toast(result.reason);
+							}
+							vue.content = null;
+							vue.plmsgs.push(result.data);
+
+							vue.scrollToBottom();
+						});
+
+					}
+				}
+			});
+		</script>
+
+	</body>
+
+</html>

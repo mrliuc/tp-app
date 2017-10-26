@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link href="css/search_map.css" rel="stylesheet" />
+		<link href="css/global.css" rel="stylesheet" />
+		<style>
+			#divMap {
+				position: absolute;
+				top: 160px;
+				left: 0px;
+				right: 0px;
+				bottom: 0px;
+			}
+			
+			.topic_detail {
+				width: 100%;
+				position: absolute;
+				top: 44px;
+				height: 116px;
+				background: white;
+				padding: 5px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="mui-navbar-inner mui-bar mui-bar-nav">
+			<button type="button" class="mui-left mui-action-back mui-btn  mui-btn-link mui-btn-nav mui-pull-left">
+					<span class="mui-icon mui-icon-left-nav"></span>
+				</button>
+			<h1 class="mui-center mui-title">订单详情</h1>
+		</div>
+		<div class="mui-content" id="content">
+
+			<div class="topic_detail" v-cloak>
+				<div>
+					{{formatDateTime(topic.PickupTime)}}
+					<span style="position: absolute; right: 10px">{{formatOrderType(topic.OrderType)}}</span>
+					<br />{{topic.PickupPoint}}/{{topic.ReturnPoint}}，{{topic.TotalWeight}}KG，&yen;{{topic.Freight}}
+					<br /><span style="margin-right: 10px" v-for="container in topic.Containers">{{container.ContainerType}}&times;{{container.Quantity}}</span>&nbsp;&nbsp;{{topic.SpecialRequirements}}
+					<br />{{topic.LadingNo}},{{topic.DocAddress}}
+					<br />{{topic.ContactName}},{{topic.ContactPhone}}
+
+				</div>
+
+			</div>
+			<div id="divMap" style=""></div>
+			
+		</div>
+
+		<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=CdYaUW1Ld8mGo4R8EvoQt5qZjqH1BctY"></script>
+
+		<script src="js/vue.min.js"></script>
+
+		<script src="js/mui.min.js"></script>
+		<script src="js/mui.picker.js"></script>
+		<script src="js/mui.poppicker.js"></script>
+		<script src="js/mui.dtpicker.min.js"></script>
+
+		<script src="js/common/model.js"></script>
+		<script src="js/common/vue-model-format.js"></script>
+		<script src="js/common/common.js"></script>
+
+		<script src="js/plugins/moment/moment-with-locales.min.js"></script>
+		<script src="js/plugins/linq/linq.min.js"></script>
+		<script src="js/common/map.extend.js"></script>
+
+		<script type="text/javascript">
+			var vue = new Vue({
+				el: '#content',
+				data: {
+					map: null,
+					topic: {}
+				},
+				created: function() {
+					this.topic = Util.getData('topic') || {};
+				},
+				mounted: function() {
+					mui.init();
+
+					if(mui.os.plus) {
+						mui.plusReady(function() {
+							vue.topic = Util.getData('topic');
+
+							vue.initMap();
+						});
+					} else {
+						this.topic = Util.getData('topic');
+						this.initMap();
+					}
+
+					//	this.map.setCenter(point)
+
+				},
+				methods: {
+					initMap: function() {
+
+						this.map = new BMap.Map("divMap", {
+							enableMapClick: false
+						});
+
+						var point = new BMap.Point(this.topic.Longitude, this.topic.Latitude);
+
+						this.map.centerAndZoom(point, 16);
+
+						this.map.enableScrollWheelZoom(); //启用滚轮放大缩小
+
+						var buildingOverlay = new BuildingOverlay(
+							point, this.topic.FullAddress, '', '', '', 18 // i = 序号
+						);
+						//console.log([this.topic.City, this.topic.District, this.topic.Street, this.topic.StreetNumber].join(' '))
+						this.map.addOverlay(buildingOverlay);
+					},
+					formatDateTime: function(time) {
+						return moment(time).format('YYYY-MM-DD HH:mm');
+					}
+				}
+			});
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>91货车-主页</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="stylesheet" href="css/mui.min.css">
+		<link rel="stylesheet" href="css/mui.pullrefresh.css">
+		<link rel="stylesheet" href="css/mui.dtpicker.min.css">
+		<link rel="stylesheet" type="text/css" href="css/icons-extra.css" />
+		<link rel="stylesheet" type="text/css" href="css/search_map.css" />
+		<link rel="stylesheet" type="text/css" href="css/global.css" />
+		<link rel="stylesheet" type="text/css" href="css/iconfont.css" />
+
+		<style>
+			html,
+			body {
+				background-color: #efeff4;
+			}
+			
+			p {
+				/*text-indent: 22px;*/
+			}
+			
+			span.mui-icon {
+				font-size: 14px;
+				color: #007aff;
+				margin-left: -15px;
+				padding-right: 10px;
+			}
+			
+			.mui-off-canvas-left {
+				color: #fff;
+			}
+			
+			.title {
+				margin: 35px 15px 10px;
+			}
+			
+			.title+.content {
+				margin: 10px 15px 35px;
+				color: #bbb;
+				text-indent: 1em;
+				font-size: 14px;
+				line-height: 24px;
+			}
+			
+			input {
+				color: #000;
+			}
+			
+			.mui-table-view .mui-media-object {
+				height: 60px;
+				max-width: 60px;
+				line-height: 60px;
+			}
+			
+			.head-ul:before,
+			.head-ul:after {
+				height: 0px;
+			}
+			
+			#popContainer {
+				position: fixed;
+				top: 16px;
+				right: 6px;
+			}
+			
+			#popContainer .mui-popover-arrow {
+				left: auto;
+				right: 6px;
+			}
+			
+			span.mui-icon {
+				font-size: 14px;
+				color: #007aff;
+				margin-left: -15px;
+				padding-right: 10px;
+			}
+			
+			.mui-popover {
+				/*height: 100px;*/
+			}
+			
+			.mui-backdrop {
+				display: none;
+			}
+			
+			.menu {
+				width: 100%;
+				text-align: center;
+				color: #000000;
+			}
+			
+			.menu .mui-icon {
+				position: absolute;
+				right: 3px;
+				padding: 0px;
+				margin: 0px;
+				height: 100%;
+				line-height: 30px;
+				color: #000000;
+			}
+			
+			.menu-row {
+				padding: 5px 0px 5px 0px;
+			}
+			
+			.menu-col {
+				line-height: 30px;
+				text-align: center;
+				border-right: 1px solid gainsboro;
+			}
+			
+			#divMap {
+				position: absolute;
+				top: 85px;
+				left: 0px;
+				right: 0px;
+				bottom: 0px;
+			}
+			
+			#divData {
+				position: absolute;
+				top: 84px;
+				left: 0px;
+				right: 0px;
+				bottom: 0px;
+				/*z-index: 1;*/
+				background: white;
+			}
+			
+			#popMore {
+				padding-bottom: 10px;
+			}
+			
+			#popMore .mui-col {
+				text-align: center;
+			}
+			
+			.date-input {
+				font-size: 14px;
+				font-weight: 400;
+				line-height: 1.42;
+				position: relative;
+				display: inline-block;
+				margin-bottom: 0;
+				padding: 6px 12px 6px;
+				cursor: pointer;
+				-webkit-transition: all;
+				transition: all;
+				-webkit-transition-timing-function: linear;
+				transition-timing-function: linear;
+				-webkit-transition-duration: .2s;
+				transition-duration: .2s;
+				vertical-align: top;
+				white-space: nowrap;
+				color: #333;
+				border: 1px solid #ccc;
+				border-radius: 3px;
+				border-top-left-radius: 3px;
+				border-top-right-radius: 3px;
+				border-bottom-right-radius: 3px;
+				border-bottom-left-radius: 3px;
+				background-color: #fff;
+				background-clip: padding-box;
+			}
+			
+			span.icon-clear {
+				position: absolute;
+				right: 15px;
+				top: 0px;
+				height: 100%;
+				padding-top: 10px;
+				text-align: center;
+			}
+			
+			.mui-table-view-chevron .mui-table-view-cell {
+				padding-right: 5px;
+			}
+			
+			.topics-list {
+				width: 100%;
+				position: absolute;
+				bottom: 0px;
+				background: transparent;
+			}
+			
+			.btn-receive {
+				width: 50px;
+				height: 25px;
+				padding: 0px;
+				position: absolute;
+				right: 5px;
+				bottom: 10px;
+			}
+			
+			span.reload {
+				position: absolute;
+				left: 20px;
+				/*color: black;*/
+				/* width: 30px; */
+				/* height: 30px; */
+				font-size: 25px;
+				background: white;
+				padding: 8px;
+				border-radius: 21px;
+				font-weight: bold;
+			}
+			/*.BMap_cpyCtrl{
+				display: none;
+			}*/
+			/*.anchorBL{
+				bottom: 30px;
+			}*/
+			
+			.mui-table-view-chevron .mui-table-view-cell>a:not(.mui-btn) {
+				margin-right: 0px;
+			}
+			
+			#popOrderType,
+			#popContainer,
+			#popDistrict {
+				text-align: center;
+				width: 100px;
+			}
+			
+			.mui-table-view-cell:after {
+				right: 10px;
+				left: 10px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="offCanvasWrapper" class="mui-off-canvas-wrap mui-draggable mui-slide-in">
+			<!--侧滑菜单部分-->
+			<aside id="offCanvasSide" class="mui-off-canvas-left">
+				<div id="offCanvasSideScroll" class="mui-scroll-wrapper">
+					<div class="mui-scroll" id="divSide">
+						<ul class="mui-table-view mui-table-view-chevron mui-table-view-inverted head-ul">
+							<li class="mui-table-view-cell mui-media" style="border: 0px;">
+
+								<img class="mui-media-object mui-pull-left head-img" src="images/logo-min.png">
+								<div class="mui-media-body" style="line-height: 25px;height: 60px;padding-top: 8px;">
+
+									<span v-if="user">
+								{{user.Name}}<span v-bind:style="{'margin-left':'3px','color':user&&user.IDAuthStatus===2?'green':'grey'}" class="tp-icon tp-icon-auth-idinfo"></span><button class="mui-pull-right mui-btn-mini mui-btn-nav" style="padding: 3px ;" v-on:tap="logout">注销</button>
+									<p class='mui-ellipsis'>账号:{{user.Mobile}}</p>
+									</span>
+
+									<button class="mui-btn mui-btn-primary" v-if="!user" style="margin-top: 8px;" v-on:tap="gotoLogin">登录</button>
+
+								</div>
+
+							</li>
+						</ul>
+						<div class="mui-content">
+
+							<ul class="mui-table-view mui-table-view-chevron mui-table-view-inverted">
+								<li class="mui-table-view-cell" v-on:tap="goto" href="topic_receive_list.html">
+									<a class="mui-navigate-right">
+										我的订单
+									</a>
+								</li>
+								<li class="mui-table-view-cell" v-on:tap="goto" href="pl_prerecord_list.html">
+									<a class="mui-navigate-right">
+										装箱单预录
+									</a>
+								</li>
+								<!--<li class="mui-table-view-cell" v-on:tap="wxpay">
+									<a class="mui-navigate-right">
+										微信支付
+									</a>
+								</li>-->
+							</ul>
+
+							<ul class="mui-table-view mui-table-view-chevron mui-table-view-inverted">
+								<li class="mui-table-view-cell" v-on:tap="goto" href="auth_id_info.html">
+									<a class="mui-navigate-right">
+										身份信息
+										<span style="position: absolute;right: 35px;font-size: 12px;">{{user&&user.IDAuthStatus===2?'已认证':'未认证'}}</span>
+									</a>
+
+								</li>
+								<li class="mui-table-view-cell" v-on:tap="goto" v-bind:href="user&&user.Parent?'user_parent_info.html':'invite_list.html'">
+									<a class="mui-navigate-right">
+									我的经纪人
+										<span style="position: absolute;right: 35px;font-size: 12px;">{{user&&user.Parent?user.Parent.Name:''}}</span>
+									
+									</a>
+
+								</li>
+							</ul>
+
+						</div>
+
+					</div>
+<p style="position: absolute;bottom: 5px;left: 15px;text-align: center;">
+	Copyright&nbsp;&copy;2017<br />
+	上海玖岚网络科技有限公司
+</p>
+					<p style="position: absolute;bottom: 5px;right: 15px;"> {{'v'+version}}</p>
+
+				</div>
+			</aside>
+			<!--主界面部分-->
+			<div class="mui-inner-wrap" id="content">
+				<header class="mui-bar mui-bar-nav">
+					<a href="#offCanvasSide" class="mui-icon mui-action-menu mui-icon-person mui-pull-left"></a>
+					<h1 class="mui-title">主页</h1>
+					<a href="#" v-bind:class="['mui-icon mui-action-menu mui-pull-right ',isShowList?'mui-icon-map':'mui-icon-list']" v-on:tap="isShowList=!isShowList;isShow=false;condition.City=null;condition.District=null"></a>
+
+				</header>
+				<div id="offCanvasContentScroll" class="mui-content mui-scroll-wrapper">
+					<div class="mui-row menu-row" id="divMenu">
+						<div class="mui-col mui-col-xs-3 menu-col" target-id="popDistrict">
+							<a href="#" class="menu">{{condition.District||'区域'}} <span class="mui-icon mui-icon-arrowdown" style=""></span></a>
+						</div>
+						
+						<div class="mui-col mui-col-xs-3 menu-col" target-id="popOrderType">
+
+							<!--<a href="#popOrderType" class="menu"><span style="display: block;width: 100%;; height: 100%;">{{Condition_OrderTypeName||'进出口'}} <span class="mui-icon mui-icon-arrowdown" style=""></span></span></a>-->
+							<a href="#" class="menu">{{Condition_OrderTypeName||'进出口'}} <span class="mui-icon mui-icon-arrowdown" style=""></span></a>
+
+						</div>
+						<div class="mui-col mui-col-xs-3 menu-col" target-id="popContainer">
+							<a href="#" class="menu">{{condition.ContainerType?(condition.ContainerType+'&times'+condition.ContainerQuantity):'箱型'}} <span class="mui-icon mui-icon-arrowdown" style=""></span></a>
+
+						</div>
+						
+						<div class="mui-col mui-col-xs-3 menu-col" target-id="popMore">
+							<a href="#" class="menu">更多 <span class="mui-icon mui-icon-arrowdown" style=""></span></a>
+
+						</div>
+
+					</div>
+					<div id="popOrderType" class="mui-popover">
+						<div class="mui-popover-arrow"></div>
+						<ul class="mui-table-view">
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.OrderType=null">全部</a>
+							</li>
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.OrderType=2">进口整箱</a>
+							</li>
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.OrderType=4">出口整箱</a>
+							</li>
+						</ul>
+
+					</div>
+
+					<div id="popContainer" class="mui-popover">
+						<ul class="mui-table-view">
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.ContainerType=null;condition.ContainerQuantity=0">全部</a>
+							</li>
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.ContainerType='20GP';condition.ContainerQuantity=1">20GP&times;1</a>
+							</li>
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.ContainerType='20GP';condition.ContainerQuantity=2">20GP&times;2</a>
+							</li>
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.ContainerType='40GP';condition.ContainerQuantity=1">40GP&times;1</a>
+							</li>
+						</ul>
+
+					</div>
+
+					<div id="popDistrict" class="mui-popover">
+						<ul class="mui-table-view">
+							<li class="mui-table-view-cell">
+								<a href="#" v-on:tap="condition.District=null;mapVue.initMapRangeOverlay();">全部</a>
+							</li>
+							<li class="mui-table-view-cell" v-for="district in Districts">
+								<a href="#" v-on:tap="condition.District=district;mapVue.initMapRangeOverlay();">{{district}}</a>
+							</li>
+						</ul>
+
+					</div>
+
+					<div id="popMore" class="mui-popover">
+
+						<h5 class="mui-content-padded">提货日期</h5>
+						<div class="mui-input-row">
+
+							<div class="mui-col mui-col-sm-12 mui-col-xs-12" style="padding: 0px 10px 0px 8px;">
+								<input class="date-input" readonly v-on:click="pickDate" style="width: 100%;" v-bind:value="condition.PickupTime===null?'':condition.PickupTime+' '+condition.AMPM" placeholder="选择日期" />
+								<span class="mui-icon mui-icon-clear icon-clear" v-on:tap="clearDate"></span>
+							</div>
+						</div>
+						<h5 class="mui-content-padded">重量</h5>
+						<div class="mui-row">
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.TotalWeight===null?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.TotalWeight=null">全部</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.TotalWeight==='<=15T'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.TotalWeight='<=15T'"><=15T</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.TotalWeight==='>15T'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.TotalWeight='>15T'">>15T</button>
+							</div>
+						</div>
+						<h5 class="mui-content-padded">提箱点</h5>
+						<div class="mui-row">
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.PickupPoint===null?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.PickupPoint=null">全部</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.PickupPoint==='外港'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.PickupPoint='外港'">外港</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.PickupPoint==='洋山'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.PickupPoint='洋山'">洋山</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.PickupPoint==='浦西'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.PickupPoint='浦西'">浦西</button>
+							</div>
+						</div>
+						<h5 class="mui-content-padded">还箱点</h5>
+						<div class="mui-row">
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.ReturnPoint===null?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.ReturnPoint=null">全部</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.ReturnPoint==='外港'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.ReturnPoint='外港'">外港</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.ReturnPoint==='洋山'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.ReturnPoint='洋山'">洋山</button>
+							</div>
+							<div class="mui-col mui-col-sm-3 mui-col-xs-3">
+								<button v-bind:class="['mui-btn',condition.ReturnPoint==='浦西'?'mui-btn-primary':'mui-btn-nav']" v-on:tap="condition.ReturnPoint='浦西'">浦西</button>
+							</div>
+						</div>
+
+					</div>
+
+					<div class="mui-col-sm-12 mui-scroll-wrapper" v-bind:style="{'z-index':isShowList?1:0}" id="divData">
+
+						<ul class="mui-table-view mui-scroll">
+							<li class="mui-table-view-cell" v-for="(topic,index) in SortTopics">
+								<div>
+									<div>
+										{{formatDateTime(topic.PickupTime)}}
+										<span style="position: absolute; right: 10px">{{formatOrderType(topic.OrderType)}}</span>
+										<br />{{topic.PickupPoint}}/{{topic.ReturnPoint}}，{{topic.TotalWeight}}KG，&yen;{{topic.Freight}}
+										<br /><span style="margin-right: 10px" v-for="container in topic.Containers">{{container.ContainerType}}&times;{{container.Quantity}}</span>&nbsp;&nbsp;{{topic.SpecialRequirements}}
+										<br />{{topic.ContactName}},{{topic.ContactPhone}}
+										<br/>{{topic.FullAddress}}
+									</div>
+									<button class="mui-btn mui-btn-primary btn-receive" v-on:tap="receive($event,topic)">接单</button>
+								</div>
+							</li>
+						</ul>
+
+					</div>
+
+					<div class="mui-col-sm-12" v-bind:style="{'bottom':isShow?'250px':'0px'}" id="divMap"></div>
+
+					<span class="mui-icon mui-icon-reload reload" v-bind:style="{'bottom':isShow?'290px':'40px'}" v-on:tap="getData"></span>
+
+					<div class="topics-list" v-bind:style="{'height':isShow?'250px':'0px'}">
+						<div class="mui-scroll-wrapper">
+							<ul class="mui-table-view mui-table-view-striped mui-table-view-condensed ">
+								<li class="mui-table-view-cell" v-for="(topic,index) in SortTopics" v-on:tap="liTopicClick(topic)">
+									<div>
+										<div>
+											{{formatDateTime(topic.PickupTime)}}
+											<span style="position: absolute; right: 10px">{{formatOrderType(topic.OrderType)}}</span>
+											<br />{{topic.PickupPoint}}/{{topic.ReturnPoint}}，{{topic.TotalWeight}}KG，&yen;{{topic.Freight}}
+											<br /><span style="margin-right: 10px" v-for="container in topic.Containers">{{container.ContainerType}}&times;{{container.Quantity}}</span>&nbsp;&nbsp;{{topic.SpecialRequirements}}
+											<br />{{topic.ContactName}},{{topic.ContactPhone}}
+										</div>
+										<button class="mui-btn mui-btn-primary btn-receive" v-on:tap="receive($event,topic)">接单</button>
+									</div>
+								</li>
+							</ul>
+
+						</div>
+					</div>
+				</div>
+				<!-- off-canvas backdrop -->
+				<div class="mui-off-canvas-backdrop"></div>
+			</div>
+		</div>
+		<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=CdYaUW1Ld8mGo4R8EvoQt5qZjqH1BctY"></script>
+
+		<script src="js/mui.min.js"></script>
+		<script src="js/mui.picker.js"></script>
+		<script src="js/mui.poppicker.js"></script>
+		<script src="js/mui.dtpicker.min.js"></script>
+
+		<script src="js/mui.pullToRefresh.js"></script>
+		<script src="js/mui.pullToRefresh.material.js"></script>
+
+		<script src="js/common/model.js"></script>
+		<script src="js/common/common.js"></script>
+		<script src="js/update.js"></script>
+
+		<script src="js/vue.min.js"></script>
+		<script src="js/common/vue-model-format.js"></script>
+
+		<script src="js/common/map.extend.js"></script>
+
+		<script src="js/plugins/moment/moment-with-locales.min.js"></script>
+		<script src="js/plugins/linq/linq.min.js"></script>
+
+		<script>
+			var vue = new Vue({
+				el: '#offCanvasSide',
+				data: {
+					user: null,
+					version: null
+//					pays:{}
+				},
+				created: function() {
+					if(!mui.os.plus) {
+						this.user = Util.getData('user');
+					}
+				},
+				mounted: function() {
+					mui.init();
+
+					mui.plusReady(function() { //5+ iOS暂时无法屏蔽popGesture时传递touch事件，故该demo直接屏蔽popGesture功能
+
+						vue.version = plus.runtime.version;
+						vue.user = Util.getData('user');
+						//实现ios平台原生侧滑关闭页面；
+						if(mui.os.plus && mui.os.ios) {
+
+							plus.webview.currentWebview().setStyle({
+								'popGesture': 'none'
+							});
+						}
+
+						window.addEventListener('dataChanged', function(e) {
+							if(e.detail.key === 'user') {
+								vue.user = e.detail.data;
+							}
+						});
+					});
+					
+//					mui.plusReady(function() {
+//						plus.payment.getChannels(function(channels) {
+//							for(var i in channels) {
+//								var channel = channels[i];
+//								if(channel.id == 'qhpay' || channel.id == 'qihoo') { // 过滤掉不支持的支付通道：暂不支持360相关支付
+//									continue;
+//								}
+//								vue.pays[channel.id] = channel;
+//							}
+//						}, function(e) {
+//							mui.toast('获取支付通道失败：' + e.message);
+//						});
+//					});
+//					
+
+					//主界面和侧滑菜单界面均支持区域滚动；
+					mui('#offCanvasSideScroll').scroll();
+					mui('#offCanvasContentScroll').scroll();
+
+					var offCanvasWrapper = mui('#offCanvasWrapper');
+					//					offCanvasWrapper.offCanvas().refresh();
+
+					//					this.$el.addEventListener('tap', function() {
+					//
+					//					});
+
+					mui("#offCanvasSide").on('tap', 'li', function() {
+						offCanvasWrapper.offCanvas('close');
+					})
+
+					this.back();
+				},
+				methods: {
+					gotoLogin: function() {
+						mui.openWindow('login.html', 'login.html');
+					},
+					back: function() {
+						var backButtonPress = 0;
+						mui.back = function(event) {
+							backButtonPress++;
+							if(backButtonPress > 1) {
+								plus.runtime.quit();
+							} else {
+								plus.nativeUI.toast('再按一次退出应用');
+							}
+							setTimeout(function() {
+								backButtonPress = 0;
+							}, 1000);
+							return false;
+						};
+					},
+					goto: function(e) {
+
+						if(!Util.getData('user')) {
+							return mui.openWindow('login.html', 'login.html');
+						}
+
+						var url = e.currentTarget.getAttribute('href');
+						mui.openWindow(url, url);
+
+					},
+					logout: function(e) {
+
+						Util.setData('user', null);
+						return mui.openWindow('login.html', 'login.html');
+
+					},
+				}
+			});
+
+			var mapVue = new Vue({
+				el: '#content',
+				data: {
+					map: null,
+					dtpicker: null,
+					condition: {
+						PickupTime: null,
+						AMPM: null,
+						OrderType: null,
+						ContainerType: null,
+						ContainerQuantity:null,
+						PickupPoint: null,
+						ReturnPoint: null,
+						TotalWeight: null,
+						City: null,
+						District: null,
+						StatusId: 2
+					},
+					topics: null,
+					isShow: false,
+					isShowList: false,
+					pullRefresh: null
+				},
+				computed: {
+					SortTopics: function() {
+						var topics = Enumerable.From(this.topics);
+						
+						if(this.condition.City ) {
+							topics = topics.Where("s=>s.City==='" + this.condition.City + "'");
+						}
+						if( this.condition.District){
+							topics = topics.Where("s=>s.District==='" + this.condition.District + "'");
+						}
+
+						if(topics.Count() === 0) {
+							this.isShow = false;
+							return [];
+						}
+
+						return topics.OrderByDescending('s=>s.CreateTime').ToArray();
+					},
+					Condition_OrderTypeName: function() {
+						return this.formatOrderType(this.condition.OrderType);
+					},
+					Districts:function(){
+						var topics = Enumerable.From(this.topics);
+						
+						return topics.Select('s=>s.District').Distinct().ToArray();
+					}
+				},
+				watch: {
+					'condition.PickupTime': {
+						handler: function(curVal, oldVal) {
+
+							this.getData();
+						}
+					},
+					'condition.AMPM': {
+						handler: function(curVal, oldVal) {
+
+							this.getData();
+						}
+					},
+					'condition.OrderType': {
+						handler: function(curVal, oldVal) {
+
+							this.getData();
+						}
+					},
+					'condition.ContainerType': {
+						handler: function(curVal, oldVal) {
+
+							this.getData();
+						}
+					},
+					'condition.ContainerQuantity': {
+						handler: function(curVal, oldVal) {
+
+							this.getData();
+						}
+					},
+
+					'condition.PickupPoint': {
+						handler: function(curVal, oldVal) {
+
+							this.getData();
+						}
+					},
+					'condition.ReturnPoint': {
+						handler: function(curVal, oldVal) {
+
+							this.getData();
+						}
+					},
+					'condition.TotalWeight': {
+						handler: function(curVal, oldVal) {
+
+							this.getData();
+						}
+					}
+				},
+				mounted: function() {
+					this.map = new BMap.Map("divMap", {
+						enableMapClick: true
+					});
+
+					this.map.centerAndZoom('上海');
+
+					this.map.enableScrollWheelZoom(); //启用滚轮放大缩小
+
+					this.map.addEventListener('click', function() {
+						mui('.mui-popover').popover('hide');
+						if(mapVue.dtpicker) {
+							mapVue.dtpicker.dispose();
+							mapVue.dtpicker = null;
+						}
+					})
+
+					mui('.mui-popover').on('tap', '.mui-table-view-cell', function() {
+						mui('.mui-popover').popover('hide');
+					});
+
+					mui('#offCanvasWrapper')[0].addEventListener('tap', function() {
+						if(mapVue.dtpicker) {
+							mapVue.dtpicker.dispose();
+							mapVue.dtpicker = null;
+						}
+					});
+
+					mui('#divMenu').on('tap', '.mui-col', function(e) {
+						mui('#' + this.getAttribute('target-id')).popover('toggle', this);
+					});
+
+					this.pullRefresh = mui('#divData').pullToRefresh({
+						down: {
+							callback: function() {
+								mapVue.getData();
+							}
+						},
+						up: {
+							contentinit: '下拉刷新',
+							contentdown: '下拉刷新',
+							callback: function() {
+								var self = this;
+								setTimeout(function() {
+									self.endPullUpToRefresh();
+								}, 500);
+							}
+						}
+					})
+					mui('.mui-scroll-wrapper').scroll();
+					this.initData();
+
+					//					this.map.addEventListener("tilesloaded",function(){
+					//						mui('.anchorBL')[0].style.bottom='0px';
+					//					});
+					//					
+
+				},
+				methods: {
+					clearDate: function() {
+						this.condition.PickupTime = null;
+						this.condition.AMPM = null;
+					},
+					pickDate: function(e) {
+						var options = {
+							"type": "hour",
+							"beginDate": new Date(),
+							"endDate": moment().add(3, 'month').toDate(),
+							"customData": {
+								"h": [{
+										value: "全天",
+										text: "全天"
+									}, {
+										value: "上午",
+										text: "上午"
+									},
+									{
+										value: "下午",
+										text: "下午"
+									},
+								]
+							}
+						};
+
+						this.dtpicker = new mui.DtPicker(options);
+						this.dtpicker.show(function(rs) {
+							mapVue.condition.PickupTime = moment(new Date(rs.y.value, rs.m.value - 1, rs.d.value)).format('YYYY-MM-DD');
+							mapVue.condition.AMPM = rs.h.value;
+
+							mapVue.dtpicker.dispose();
+							mapVue.dtpicker = null;
+						});
+
+					},
+					formatDateTime: function(time) {
+						return moment(time).format('YYYY-MM-DD HH:mm');
+					},
+					formatOrderType: function(orderType) {
+						return Model.OrderTypeName[orderType];
+					},
+					initData: function() {
+						Util.ajax('/topic/get', {
+							Condition: this.condition
+						}, function(result) {
+							if(!result.isSuccess) {
+								return;
+							}
+
+							mapVue.topics = result.data;
+							mapVue.initMapRangeOverlay();
+
+						});
+					},
+					getData: function() {
+						Util.ajaxWithLoading('/topic/get', {
+							Condition: this.condition
+						}, function(result) {
+							if(!result.isSuccess) {
+								return;
+							}
+
+							mapVue.isShow = false;
+
+							mapVue.topics = result.data;
+							mapVue.initMapRangeOverlay();
+
+							if(mapVue.pullRefresh.loading) {
+								mapVue.pullRefresh.endPullDownToRefresh();
+
+							}
+
+						});
+					},
+					initMapRangeOverlay: function() {
+						mapVue.map.clearOverlays();
+						mapVue.map.setZoom(13);
+						var myGeo = new BMap.Geocoder();
+
+						var points = [];
+						//  var district = [];
+						var dataArray=Enumerable.From(this.SortTopics).GroupBy('$.City+$.District');
+						var dataCount=dataArray.Count();
+						dataArray.ForEach(function(item) {
+							// district.push({ District: item.Key(), Count: item.Count() });
+
+							var obj = item.First();
+							var district = item.Key();
+							var count = item.Count();
+
+							// 将地址解析结果显示在地图上,并调整地图视野
+							myGeo.getPoint(district, function(point) {
+								if(point) {
+									points.push(point);
+									var code = obj.City,
+										url = obj.District,
+										text = obj.District + "<br />" + count + "单"; // 拼接字符串
+									var zoom = 15; // 获取地图层级
+									var rangeOverlay = new RangeOverlay(
+										point, text, code, url, zoom, mapVue.zoomend
+									);
+									mapVue.map.addOverlay(rangeOverlay);
+									
+									if(dataCount===points.length){
+									mapVue.map.setViewport(points);
+									}
+
+									if(mapVue.map.getZoom() >12) {
+										mapVue.map.setZoom(12);
+									}
+									
+									if(mapVue.map.getZoom() <10) {
+										mapVue.map.setZoom(10);
+									}
+
+									//   mapVue.map.centerAndZoom(point, 16);
+								} else {
+									// alert("您选择地址没有解析到结果!");
+								}
+							});
+						});
+
+					},
+					zoomend: function() {
+						var zoomLevel = mapVue.map.getZoom(); //　当前地图级别
+						if(true) {
+
+							var centerPoint = mapVue.map.getCenter();
+							var geoc = new BMap.Geocoder();
+							geoc.getLocation(centerPoint, function(rs) {
+								var addComp = rs.addressComponents;
+								//   alert(+ addComp.city + ", " + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber);
+								mapVue.map.clearOverlays();
+
+								var points = [];
+
+								mapVue.condition.City = addComp.city;
+								mapVue.condition.District = addComp.district;;
+
+								Enumerable.From(mapVue.SortTopics).Select('s=>s.Longitude+","+s.Latitude').Distinct().ForEach(function(s) {
+
+									var topics = Enumerable.From(mapVue.SortTopics).Where('s=>(s.Longitude+","+s.Latitude)==="' + s + '"').ToArray();
+
+									var html = '';
+
+									//									topics.forEach(function(item) {
+									//										var containerHtml = [];
+									//										item.Containers.forEach(function(container) {
+									//											containerHtml.push('<span style="margin-right:10px">' + container.ContainerType + '&times;' + container.Quantity + '</span>');
+									//										});
+									//
+									//										html += '<div style="margin-bottom:10px;">' + mapVue.formatDateTime(item.PickupTime) + "<br/>" + [item.PickupPoint + '/' + item.ReturnPoint, item.TotalWeight + 'KG', '&yen;' + item.Freight].join('，') + '<br/>' + [containerHtml.join(''), item.SpecialRequirements].join('，') + '<br/>' + [item.ContactName, item.ContactPhone].join('，') + '<button class="btn btn-primary btn-receive1" onclick="mapVue.receive2(this,' + item.Id + ')">接单</button></div>';
+									//									});
+
+									var item = topics[0];
+
+									var point = new BMap.Point(item.Longitude, item.Latitude);
+									points.push(point);
+
+									var buildingOverlay = new BuildingOverlay(
+										point, item.FullAddress, '', '', html, 18,
+										function() {
+											mapVue.condition.City = item.City;
+											mapVue.condition.District = item.District;
+											mapVue.isShow = true;
+
+										}
+									);
+									mapVue.map.addOverlay(buildingOverlay);
+
+								});
+								mapVue.map.setViewport(points);
+
+								mapVue.isShow = true;
+
+							});
+						}
+					},
+					liTopicClick: function(topic) {
+						mapVue.map.setCenter(new BMap.Point(topic.Longitude, topic.Latitude));
+					},
+					receive: function(e, topic) {
+
+						if(!Util.getData('user')) {
+							return mui.openWindow('login.html', 'login.html');
+						}
+
+						var html = '<div style="width:100%;text-align:left;margin-bottom:5px">' + e.currentTarget.parentNode.firstChild.innerText + '</div>';
+
+						mui.confirm(html + '是否确认接单？', '提示', function(rs) {
+							if(rs.index === 0) {
+								return;
+							}
+
+							Util.ajax('/topic/receive', {
+								Id: topic.Id
+							}, function(result) {
+								if(!result.isSuccess) {
+									return mui.toast(result.reason);
+								}
+
+								return Util.alert('操作成功', function() {
+									//  mapVue.search();
+
+									mapVue.topics.forEach(function(item, i) {
+										if(item.Id === topic.Id) {
+											mapVue.topics.splice(i, 1);
+
+											var allOverlay = mapVue.map.getOverlays();
+											for(var i = 0; i < allOverlay.length; i++) {
+												if(allOverlay[i]._point.lat === topic.Latitude && allOverlay[i]._point.lng === topic.Longitude) {
+													mapVue.map.removeOverlay(allOverlay[i]);
+													return false;
+												}
+											}
+											return false;
+										}
+									});
+
+								});
+							});
+						}, 'div');
+
+					}
+				}
+			});
+		</script>
+	</body>
+
+</html>
