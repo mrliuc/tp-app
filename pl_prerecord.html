@@ -236,7 +236,7 @@
 									}
 
 									mui.toast('下单成功');
-									Util.setData('payInfo',{orderNo:result.data.PLNo,amount:result.data.Fee});
+									Util.setData('payInfo',{orderNo:result.data.PLNo,amount:result.data.Fee,payType:'PLPreRecord'});
 									
 									mui.openWindow('pay.html');
 									

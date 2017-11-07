@@ -75,6 +75,10 @@
 						<input type="text" class="mui-input-clear mui-input" ref="captcha" v-model="captcha" placeholder="请输入验证码" required>
 						<button class="mui-btn mui-btn-primary" type="button" v-on:click="sendCaptcha" style="position: absolute;right: 10px;text-align: center;width: auto;">发送</button>
 					</div>
+						<div class="mui-input-row">
+						<label>邀请码</label>
+						<input id='inviteCode' type="text" ref="inviteCode" v-model="inviteCode" class="mui-input-clear mui-input" placeholder="非必填">
+					</div>
 
 				</div>
 				<div class="mui-content-padded">
@@ -96,6 +100,7 @@
 					password_confirm: null,
 					plateNo:null,
 					captcha: null,
+					inviteCode:null,
 					operation: 'Register'
 				},
 				mounted: function() {
@@ -148,6 +153,10 @@
 						if(this.password !== this.password_confirm) {
 							return mui.toast('两次密码不一致')
 						}
+						
+						if(this.inviteCode&&this.inviteCode.length<4){
+							return mui.toast('邀请码不符合规则');
+						}
 
 						Util.ajaxWithLoading('/user/Reg', {
 							Mobile: this.mobile,
@@ -155,7 +164,8 @@
 							Name: this.name,
 							Password: this.password,
 							PlateNo:this.plateNo,
-							Captcha: this.captcha
+							Captcha: this.captcha,
+							InviteCode:this.inviteCode
 						}, function(result) {
 							if(!result.isSuccess) {
 								return mui.toast(result.reason)

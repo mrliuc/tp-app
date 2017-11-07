@@ -64,9 +64,6 @@
 
 	<script src="js/mui.min.js"></script>
 	<script src="js/mui.poppicker.js"></script>
-	<script src="js/mui.dtpicker.min.js"></script>
-	<script src="js/mui.pullToRefresh.js"></script>
-	<script src="js/mui.pullToRefresh.material.js"></script>
 
 	<script src="js/mui.pullToRefresh.js"></script>
 	<script src="js/mui.pullToRefresh.material.js"></script>
@@ -110,7 +107,7 @@
 							}, 1000);
 						}
 					}
-				})
+				});
 				
 				mui('.mui-scroll-wrapper').scroll();
 				
@@ -152,9 +149,6 @@
 
 			},
 			methods: {
-				formatDateTime: function(time) {
-					return moment(time).format('YYYY-MM-DD HH:mm');
-				},
 				formatPLPRStatus: function(statusId) {
 					return Model.PLPRStatusName[statusId];
 				},

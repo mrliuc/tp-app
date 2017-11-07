@@ -30,12 +30,25 @@
 			<h1 class="mui-title">订单支付</h1>
 		</header>
 		<div class="mui-content" id="content">
-			<div class="mui-table-view">
+			<div class="mui-table-view" v-if="info.payType==='PLPreRecord'">
 				<div><span>订单号：</span><label>{{info.orderNo}}</label></div>
 				<div><span>金额：</span><label>{{info.amount}}元</label></div>
 			</div>
 			<p>选择支付方式</p>
 			<ul class="mui-table-view mui-input-group">
+				<li class="mui-table-view-cell mui-media">
+					<img src="images/logo-min.png" class="mui-pull-left" style="line-height: 42px;height: 42px;" />
+					<div class="mui-media-body" style="margin-left: 60px;">
+						余额支付
+						<p class='mui-ellipsis'>剩余{{remainTimes}}次</p>
+
+						<div class="mui-radio" style="position: initial;">
+							<input name="radio1" type="radio" style="top: 18px;" value="balancepay" v-model="payId">
+						</div>
+					</div>
+
+				</li>
+
 				<li class="mui-table-view-cell mui-media">
 					<img src="img/wx-logo.png" class="mui-pull-left" style="line-height: 42px;height: 42px;" />
 					<div class="mui-media-body" style="margin-left: 60px;">
@@ -66,12 +79,21 @@
 				el: '#content',
 				data: {
 					info: {
-						payType: 'PLPreRecord',
+						payType: null,
 						amount: null,
-						orderNo: null
+						orderNo: null,
+
 					},
-					payId: 'wxpay',
+					remainTimes: null,
+					payId: null,
 					pays: {}
+				},
+				watch: {
+					'info.payType': function() {
+						if(this.info.payType === 'PLPreRecord') {
+							this.getPLBalance();
+						}
+					}
 				},
 				created: function() {
 					if(!mui.os.plus) {
@@ -80,12 +102,12 @@
 				},
 				mounted: function() {
 					mui.init()
-					
-					document.getElementById('btnBack').addEventListener('tap',function(){
+
+					document.getElementById('btnBack').addEventListener('tap', function() {
 						mui.back();
 					});
 
-					mui.plusReady(function() { //5+ iOS暂时无法屏蔽popGesture时传递touch事件，故该demo直接屏蔽popGesture功能
+					mui.plusReady(function() {
 						vue.info = Util.getData('payInfo');
 
 						plus.payment.getChannels(function(channels) {
@@ -104,8 +126,41 @@
 					});
 				},
 				methods: {
+					getPLBalance: function() {
+						vue.payId='balancepay';
+						Util.ajax('/pl/balance', {}, function(result) {
+							if(!result.isSuccess) {
+								return mui.toast(result.reason);
+							}
+//							console.log(JSON.stringify(result.data));
+							vue.remainTimes = result.data.RemainTimes;
+							
+							if(vue.remainTimes===0){
+								vue.payId='wxpay';
+							}
+						})
+					},
 					pay: function() {
-
+						
+						if(this.payId!=='balancepay'){
+							return this.cashpay();
+						}
+						
+						if(this.remainTimes<1){
+							return mui.toast('剩余次数不足，请充值或选择其他支付方式')
+						}
+						
+						Util.ajaxWithLoading('/pl/send',{PLNo:this.info.orderNo},function(result){
+							if(!result.isSuccess){
+								return mui.toast(result.reason);
+							}
+							
+							mui.toast('发送成功');
+							return mui.back();
+							
+						});
+					},
+					cashpay:function(){
 						var payChannel = vue.pays[this.payId];
 						if(!this.checkServices(payChannel)) {
 							return;
@@ -121,7 +176,7 @@
 							console.log(JSON.stringify(result.data));
 
 							plus.payment.request(payChannel, JSON.stringify(result.data), function(result) {
-																console.log(JSON.stringify(result));
+								console.log(JSON.stringify(result));
 								//								mui.alert('支付成功', '电子装箱单预录', function() {
 								//									mui.back();
 								//								});
@@ -156,24 +211,19 @@
 
 							}, function(e) {
 								console.log('----- 支付失败 -----');
-								mui.alert('[' + e.code + ']：' + e.message);
-
-								//								mui.toast('');
-								//									plus.nativeUI.alert('更多错误信息请参考支付(Payment)规范文档：http://www.html5plus.org/#specification#/specification/Payment.html', null, '支付失败：' + e.code);
+								mui.toast('[' + e.code + ']：' + e.message);
 							});
 
-							//							mui.alert(JSON.stringify(result.data),'',function(){
-							//								
-							//							})
+						});
 
-						})
 					},
+
 					back: function() {
 						var wvList = plus.webview.getWebviewById('pl_prerecord_list.html');
 						mui.fire(wvList, 'refresh', {});
 						//											 wvList.show();
 						//									plus.webview.getWebviewById('pl_prerecord.html').close();
-//						plus.webview.getWebviewById('pl_prerecord.html').hide();
+						//						plus.webview.getWebviewById('pl_prerecord.html').hide();
 						plus.webview.currentWebview().opener().hide();
 						plus.webview.currentWebview().close();
 					},

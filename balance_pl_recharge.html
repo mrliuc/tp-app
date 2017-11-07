@@ -1,0 +1,216 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<style>
+
+			
+			.mui-content-padded {
+				margin: 60px 10px;
+			}
+			
+			.mui-input-row {
+				/*height: 100px;*/
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left" id="btnBack"></a>
+			<h1 class="mui-title">装箱单预录充值</h1>
+
+		</header>
+		<div class="mui-content" id="content">
+			<ul class="mui-table-view mui-input-group">
+				<li class="mui-table-view-cell" v-for="type in rechargeTypes" v-on:tap="check(type.Id)">
+
+					<div class="mui-radio mui-left" style="position: initial;">
+						<input name="radio2" type="radio" style="top: 18px;" v-bind:value="type.Id" v-model="checkedTypeId">
+					</div>
+					<div style="margin-left: 45px;">
+						{{type.Fee}}元&nbsp;/&nbsp;{{type.Times}}次
+						<p class='mui-ellipsis'>{{type.Subtitle}}</p>
+					</div>
+
+				</li>
+			</ul>
+
+			<br />
+			<br />
+			<p style="padding-left: 10px;">选择支付方式</p>
+			<ul class="mui-table-view mui-input-group">
+				<li class="mui-table-view-cell mui-media">
+					<img src="img/wx-logo.png" class="mui-pull-left" style="line-height: 42px;height: 42px;" />
+					<div class="mui-media-body" style="margin-left: 60px;">
+						微信支付
+						<p class='mui-ellipsis'>亿万用户的选择，更快更安全</p>
+
+						<div class="mui-radio" style="position: initial;">
+							<input name="radio1" type="radio" style="top: 18px;" value="wxpay" v-model="payId">
+						</div>
+					</div>
+
+				</li>
+
+			</ul>
+
+			<div class="mui-content-padded">
+				<button class="mui-btn mui-btn-warning" style="height: 45px;width: 100%;" v-on:tap="pay">充值</button>
+			</div>
+		</div>
+
+		<script src="js/vue.min.js"></script>
+		<script src="js/mui.min.js"></script>
+		<script src="js/common/common.js"></script>
+
+		<script src="js/plugins/linq/linq.min.js"></script>
+
+		<script src="js/common/model.js"></script>
+		
+		<script type="text/javascript">
+			var vue=new Vue({
+				el:'#content',
+				data:{
+					payId:'wxpay',
+					pays: {},
+					checkedTypeId:2,
+					rechargeTypes:[]
+				},
+				created:function(){
+					this.initRechargeType();
+				},
+				mounted:function(){
+					mui.init();
+					
+					mui.plusReady(function() {
+						vue.info = Util.getData('payInfo');
+
+						plus.payment.getChannels(function(channels) {
+							for(var i in channels) {
+								var channel = channels[i];
+								if(channel.id == 'qhpay' || channel.id == 'qihoo') { // 过滤掉不支持的支付通道：暂不支持360相关支付
+									continue;
+								}
+								vue.pays[channel.id] = channel;
+							}
+						}, function(e) {
+							mui.toast('获取支付通道失败：' + e.message);
+						});
+												
+						mui.back=vue.back;
+					});
+					
+					document.getElementById('btnBack').addEventListener('tap',function(){
+						mui.back();
+					});
+				},
+				methods:{
+					initRechargeType:function(){
+						Util.ajaxWithLoading('/pl/rechargeType',{},function(result){
+							if(!result.isSuccess){
+								return mui.toast(result.reason);
+							}
+							
+							var t=Enumerable.From(result.data).SingleOrDefault(null,'s=>s.IsDefault')
+							vue.checkedTypeId=t?t.Id:null;
+							vue.rechargeTypes=result.data;
+						})
+					},
+					check:function(id){
+						this.checkedTypeId=id;
+					},
+					pay: function() {
+
+						var payChannel = vue.pays[this.payId];
+						if(!this.checkServices(payChannel)) {
+							return;
+						}
+
+						Util.ajaxWithLoading('/pl/recharge', {
+							RechargeTypeId: this.checkedTypeId
+						}, function(result) {
+							if(!result.isSuccess) {
+								return mui.toast(result.reason);
+							}
+							
+							var no=result.no;
+
+//							console.log(JSON.stringify(result));
+
+							plus.payment.request(payChannel, JSON.stringify(result.data), function(result) {
+																console.log(JSON.stringify(result));
+
+								plus.nativeUI.showWaiting('支付成功，正在充值...');
+
+								var count = 0;
+
+								var getStatus = function() {
+									Util.ajax('/pl/bdstatus', {
+										No: no
+									}, function(result) {
+										if(result.isSuccess) {
+											if(result.data.StatusId===Model.PayStatus.支付成功){
+												plus.nativeUI.closeWaiting();
+
+											mui.toast('充值成功');
+											return mui.back();
+
+											}
+										}
+										if(count++ > 20) {
+											plus.nativeUI.closeWaiting();
+
+											mui.toast('充值失败，请联系客服处理')
+											return mui.back();
+
+										}
+										setTimeout(getStatus, 1000);
+									})
+								};
+
+								setTimeout(getStatus, 1000);
+
+							}, function(e) {
+								console.log('----- 支付失败 -----');
+								mui.toast('[' + e.code + ']：' + e.message);
+
+							});
+						})
+					},
+					back: function() {
+						var wvList = plus.webview.getWebviewById('balance.html');
+						mui.fire(wvList, 'refreshPL', {});
+						plus.webview.currentWebview().close();
+					},
+					checkServices: function(pc) {
+						if(!pc.serviceReady) {
+							var txt = null;
+							switch(pc.id) {
+								case 'alipay':
+									txt = '检测到系统未安装“支付宝快捷支付服务”，无法完成支付操作，是否立即安装？';
+									break;
+								default:
+									txt = '系统未安装“' + pc.description + '”服务，无法完成支付，是否立即安装？';
+									break;
+							}
+							plus.nativeUI.confirm(txt, function(e) {
+								if(e.index == 0) {
+									pc.installService();
+								}
+							}, pc.description);
+						}
+
+						return pc.serviceReady;
+					}
+
+				}
+			});
+		</script>
+	</body>
+
+</html>

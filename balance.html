@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" href="css/mui.pullrefresh.css">
+
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">我的账户</h1>
+
+		</header>
+		<div class="mui-content" id="content" style="position: absolute;top:44px;bottom:0px;width: 100%;">
+			<div id="divData" class="mui-scroll-wrapper">
+
+				<div class="mui-card">
+					<div class="mui-card-header">装箱单预录</div>
+					<div class="mui-card-content">
+						<div class="mui-card-content-inner" style="text-align: center;font-size: 25px;">
+							剩余<span style="font-size: 30px;margin: 0px 10px;color: deepskyblue;">{{PLBalance.RemainTimes}}</span>次
+						</div>
+					</div>
+					<div class="mui-card-footer">
+						<a class="mui-card-link" v-on:tap="goto" url="balance_pl_recharge_list.html">明细</a>
+						<a class="mui-card-link" v-on:tap="goto" url="balance_pl_recharge.html">充值</a>
+					</div>
+				</div>
+
+			</div>
+		</div>
+		<script src="js/vue.min.js"></script>
+		<script src="js/mui.min.js"></script>
+		<script src="js/common/common.js"></script>
+
+		<script src="js/mui.pullToRefresh.js"></script>
+		<script src="js/mui.pullToRefresh.material.js"></script>
+
+		<script type="text/javascript">
+			var vue = new Vue({
+				el: '#content',
+				data: {
+					PLBalance: {},
+					pullRefresh: null
+				},
+				created: function() {
+//					this.getPLBalance();
+				},
+				mounted: function() {
+					mui.init();
+//				mui('.mui-scroll-wrapper').scroll();
+					this.pullRefresh = mui('#divData').pullToRefresh({
+						down: {
+							callback: function() {
+								vue.pulldownRefresh();
+							}
+						},
+						up: {
+							contentinit: '',
+							contentdown: '',
+							callback: function() {
+								var self = this;
+								setTimeout(function() {
+									self.endPullUpToRefresh();
+								}, 1000);
+							}
+						}
+					});
+					
+					mui.plusReady(function(){
+						vue.getPLBalance();
+					});
+
+					window.addEventListener('refreshPL', function(e) {
+						vue.getPLBalance();
+					});
+
+				},
+				methods: {
+					goto: function(e) {
+						var url = e.currentTarget.getAttribute('url');
+						mui.openWindow(url, url);
+
+					},
+					getPLBalance: function() {
+						Util.ajax('/pl/balance', {}, function(result) {
+							try {
+								vue.pullRefresh.endPullDownToRefresh();
+							} catch(e) {}
+							if(!result.isSuccess) {
+								return mui.toast(result.reason);
+							}
+//							console.log(JSON.stringify(result.data));
+							vue.PLBalance = result.data;
+							
+							Util.setData('isReadBalance',true);
+//						console.log(Util.getData('isReadBalance'))
+							
+						})
+					},
+					pulldownRefresh: function() {
+						this.getPLBalance();
+					}
+				}
+			});
+		</script>
+	</body>
+
+</html>

@@ -233,6 +233,21 @@
 				right: 10px;
 				left: 10px;
 			}
+			
+		.red-point{
+          position: relative;
+        }
+
+        .red-point::before{
+          content: " ";
+          border: 3px solid red;/*设置红色*/
+          border-radius:3px;/*设置圆角*/
+          position: absolute;
+          z-index: 1000;
+          right: 0%;
+          /*margin-right: -5px;
+          margin-top: -5px;*/
+        }
 		</style>
 	</head>
 
@@ -262,6 +277,13 @@
 						<div class="mui-content">
 
 							<ul class="mui-table-view mui-table-view-chevron mui-table-view-inverted">
+								<li class="mui-table-view-cell" v-on:tap="goto" href="balance.html">
+									<a class="mui-navigate-right">
+										我的账户
+										<span v-if="!isReadBalance" class="red-point" style="position: absolute;right: 35px;top:19px;font-size: 12px;"></span>
+
+									</a>
+								</li>
 								<li class="mui-table-view-cell" v-on:tap="goto" href="topic_receive_list.html">
 									<a class="mui-navigate-right">
 										我的订单
@@ -270,6 +292,7 @@
 								<li class="mui-table-view-cell" v-on:tap="goto" href="pl_prerecord_list.html">
 									<a class="mui-navigate-right">
 										装箱单预录
+<img src="img/new.png" style="width:25px" />
 									</a>
 								</li>
 								<!--<li class="mui-table-view-cell" v-on:tap="wxpay">
@@ -295,6 +318,13 @@
 									</a>
 
 								</li>
+								<li class="mui-table-view-cell" v-on:tap="goto" href="invite_code.html">
+									<a class="mui-navigate-right">
+										邀请码
+									
+									</a>
+
+								</li>
 							</ul>
 
 						</div>
@@ -311,8 +341,9 @@
 			<!--主界面部分-->
 			<div class="mui-inner-wrap" id="content">
 				<header class="mui-bar mui-bar-nav">
-					<a href="#offCanvasSide" class="mui-icon mui-action-menu mui-icon-person mui-pull-left"></a>
+					<a href="#offCanvasSide" class="mui-icon mui-action-menu tp-icon tp-icon-wode mui-pull-left "><span class="red-point" v-if="!isReadBalance"></span></a>
 					<h1 class="mui-title">主页</h1>
+
 					<a href="#" v-bind:class="['mui-icon mui-action-menu mui-pull-right ',isShowList?'mui-icon-map':'mui-icon-list']" v-on:tap="isShowList=!isShowList;isShow=false;condition.City=null;condition.District=null"></a>
 
 				</header>
@@ -515,12 +546,14 @@
 				el: '#offCanvasSide',
 				data: {
 					user: null,
-					version: null
+					version: null,
+					isReadBalance:true,
 //					pays:{}
 				},
 				created: function() {
 					if(!mui.os.plus) {
 						this.user = Util.getData('user');
+						this.isReadBalance=Boolean(Util.getData('isReadBalance'));
 					}
 				},
 				mounted: function() {
@@ -530,6 +563,8 @@
 
 						vue.version = plus.runtime.version;
 						vue.user = Util.getData('user');
+						vue.isReadBalance=Boolean(Util.getData('isReadBalance'));
+						
 						//实现ios平台原生侧滑关闭页面；
 						if(mui.os.plus && mui.os.ios) {
 
@@ -541,6 +576,14 @@
 						window.addEventListener('dataChanged', function(e) {
 							if(e.detail.key === 'user') {
 								vue.user = e.detail.data;
+								
+							}
+							
+							if(e.detail.key === 'isReadBalance'){
+								
+								vue.isReadBalance=e.detail.data;
+								mapVue.isReadBalance=e.detail.data;
+
 							}
 						});
 					});
@@ -636,7 +679,9 @@
 					topics: null,
 					isShow: false,
 					isShowList: false,
-					pullRefresh: null
+					pullRefresh: null,
+					isReadBalance:true
+					
 				},
 				computed: {
 					SortTopics: function() {
@@ -716,6 +761,11 @@
 						}
 					}
 				},
+				created:function(){
+					if(!mui.os.plus){
+						this.isReadBalance=Boolean(Util.getData('isReadBalance'));
+					}
+				},
 				mounted: function() {
 					this.map = new BMap.Map("divMap", {
 						enableMapClick: true
@@ -772,6 +822,13 @@
 					//						mui('.anchorBL')[0].style.bottom='0px';
 					//					});
 					//					
+					
+					mui.plusReady(function(){
+						console.log('123123')
+						console.log(Util.getData('isReadBalance'))
+						mapVue.isReadBalance=Boolean(Util.getData('isReadBalance'));
+					});
+					
 
 				},
 				methods: {

@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" href="css/mui.pullrefresh.css">
+
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">邀请码</h1>
+
+		</header>
+		<div class="mui-content" id="content" style="position: absolute;top:44px;bottom:0px;width: 100%;">
+			<div id="divData" class="mui-scroll-wrapper">
+
+				<div class="mui-card">
+					<div class="mui-card-header">我的邀请码
+						<a class="mui-card-link" v-on:tap="copy">复制</a>
+
+					</div>
+					<div class="mui-card-content">
+						<div class="mui-card-content-inner" style="text-align: center;font-size: 25px;">
+							<span style="font-size: 30px;margin: 0px 10px;color: deepskyblue;">{{code}}</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="mui-card">
+					<div class="mui-card-header">我的邀请人</div>
+					<div class="mui-card-content">
+						<div class="mui-card-content-inner" style="text-align: center;font-size: 25px;" v-if="user&&user.InviterId">
+							<span style="font-size: 30px;margin: 0px 10px;color: deepskyblue;">{{user.InviterName}}</span>
+						</div>
+						<div v-else>
+							<div class="mui-input-group">
+								<div class="mui-input-row">
+									<label style="text-align: right;">邀请码</label>
+									<input type="number" class="mui-input-clear" v-model="inviteCode" placeholder="请输入邀请码">
+								</div>
+
+								<div class="mui-button-row">
+									<button type="button" class="mui-btn mui-btn-primary" v-on:tap="set">确认</button>&nbsp;&nbsp;
+
+								</div>
+							</div>
+
+						</div>
+					</div>
+
+				</div>
+				
+				<div style="text-align: center;margin-top: 30px;">
+					<p style="padding-left: 20px;padding-right: 20px;">邀请好友注册，填写您的邀请码，首单成功后即可获赠3次免费预录哦~</p>
+				<img src="img/QRCode.png" style="width: 150px;" />
+					
+				</div>
+
+			</div>
+			<script src="js/vue.min.js"></script>
+			<script src="js/mui.min.js"></script>
+			<script src="js/common/common.js"></script>
+
+			<script src="js/mui.pullToRefresh.js"></script>
+			<script src="js/mui.pullToRefresh.material.js"></script>
+
+			<script type="text/javascript">
+				var vue = new Vue({
+					el: '#content',
+					data: {
+						PLBalance: {},
+						inviteCode: null,
+						user: null,
+						pullRefresh: null
+					},
+					computed: {
+						code: function() {
+							if(this.user) {
+								var pad = "0000"
+								var str = this.user.Id + '';
+								if(pad.length <= str.length) {
+									return str;
+								}
+								return pad.substring(0, pad.length - str.length) + str;
+							}
+						}
+					},
+					created: function() {
+						if(!mui.os.plus) {
+							this.user = Util.getData('user');
+						}
+					},
+					mounted: function() {
+						mui.init();
+						mui.plusReady(function() {
+							vue.user = Util.getData('user');
+						});
+
+					},
+					methods: {
+						set: function() {
+							if(this.inviteCode.length < 4) {
+								return mui.toast('邀请码不符合规则')
+							}
+							Util.ajaxWithLoading('/user/setinvitecode', {
+								Code: this.inviteCode
+							}, function(result) {
+								if(!result.isSuccess) {
+									return mui.toast(result.reason);
+								}
+								//							console.log(JSON.stringify(result.data));
+								vue.user = Util.getData('user');
+								vue.user.InviterId = result.data.InviterId;
+								vue.user.InviterName = result.data.InviterName;
+
+								Util.setData('user', vue.user);
+
+								mui.alert(result.data.Msg);
+							})
+						},
+						copy: function() {
+							if(mui.os.android) {
+								var Context = plus.android.importClass("android.content.Context");
+								var main = plus.android.runtimeMainActivity();
+								var clip = main.getSystemService(Context.CLIPBOARD_SERVICE);
+								plus.android.invoke(clip, "setText", this.code);
+							}
+
+							if(mui.os.ios) {
+								var UIPasteboard = plus.ios.importClass("UIPasteboard");
+								var generalPasteboard = UIPasteboard.generalPasteboard();
+								// 设置/获取文本内容:
+								generalPasteboard.setValueforPasteboardType(this.code, "public.utf8-plain-text");
+
+							}
+
+							mui.toast('复制成功')
+						}
+					}
+				});
+			</script>
+	</body>
+
+</html>

@@ -742,7 +742,9 @@
 								vue.pl.StatusId=Model.PLPRStatus.已取消;
 								
 								mui.fire(plus.webview.getWebviewById('pl_prerecord_list.html'), 'refresh',{} );
-								
+								if(vue.pl.PayChannel==='balance'){
+									return mui.toast('取消成功');
+								}
 								mui.toast('取消成功，费用将在24小时之内退回');
 							});
 						});
@@ -750,7 +752,7 @@
 					},
 					gotoPay:function(){
 						console.log(this.pl.Fee);
-						Util.setData('payInfo',{orderNo:this.pl.PLNo,amount:this.pl.Fee});
+						Util.setData('payInfo',{orderNo:this.pl.PLNo,amount:this.pl.Fee,payType:'PLPreRecord'});
 									
 						mui.openWindow('pay.html');
 					},

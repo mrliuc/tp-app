@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" href="css/mui.pullrefresh.css">
+		<link rel="stylesheet" href="css/global.css" />
+
+		<style>
+			.mui-table-view-cell:after {
+				right: 10px;
+				left: 10px;
+			}
+			
+			.pl-data span {
+				display: inline-block;
+				color: #0062cc;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">装箱单预录充值明细</h1>
+
+		</header>
+		<div class="mui-content" id="content" style="position: absolute;top:44px;bottom:0px;width: 100%;">
+
+			<div class="mui-scroll-wrapper" id="divData" v-cloak>
+				<ul class="mui-table-view mui-scroll">
+					<li class="mui-table-view-cell" v-for="(recharge,index) in SortRecharges">
+						<div v-if="recharge.RechargeType===RechargeType.充值">
+							{{recharge.Fee}}元/{{recharge.Times}}次<label style="position: absolute; right: 10px;">充值</label>
+
+							<p>{{formatDateTime(recharge.CreateTime)}}</p>
+						</div>
+						<div v-if="recharge.RechargeType===RechargeType.注册">
+							注册成功，送{{recharge.Times}}次
+							<p>{{formatDateTime(recharge.CreateTime)}}</p>
+						</div>
+						<div v-if="recharge.RechargeType===RechargeType.邀请">
+							邀请成功，送{{recharge.Times}}次
+							<p>{{formatDateTime(recharge.CreateTime)}}</p>
+						</div>
+
+					</li>
+
+				</ul>
+			</div>
+
+		</div>
+
+		<script src="js/vue.min.js"></script>
+
+		<script src="js/mui.min.js"></script>
+
+		<script src="js/mui.pullToRefresh.js"></script>
+		<script src="js/mui.pullToRefresh.material.js"></script>
+
+		<script src="js/common/model.js"></script>
+		<script src="js/common/vue-model-format.js"></script>
+		<script src="js/common/common.js"></script>
+
+		<script src="js/plugins/moment/moment-with-locales.min.js"></script>
+		<script src="js/plugins/linq/linq.min.js"></script>
+
+		<script type="text/javascript">
+			var vue = new Vue({
+				el: '#content',
+				data: {
+					pullRefresh: null,
+					recharges: [],
+					RechargeType: {}
+				},
+				computed: {
+					SortRecharges: function() {
+						var recharges = Enumerable.From(this.recharges);
+
+						return recharges.OrderByDescending('s=>s.CreateTime').ToArray();
+					}
+				},
+				created: function() {
+					this.RechargeType = Model.RechargeType;
+				},
+				mounted: function() {
+					mui.init();
+					this.pullRefresh = mui('#divData').pullToRefresh({
+						down: {
+							callback: function() {
+								vue.pulldownRefresh();
+							}
+						},
+						up: {
+							contentinit: '下拉刷新',
+							contentdown: '下拉刷新',
+							callback: function() {
+								var self = this;
+								setTimeout(function() {
+									self.endPullUpToRefresh();
+								}, 1000);
+							}
+						}
+					});
+
+					mui('.mui-scroll-wrapper').scroll();
+					mui.ready(function() {
+						vue.pullRefresh.pullDownLoading();
+					});
+				},
+				methods: {
+					pulldownRefresh: function() {
+						Util.ajaxWithLoading('/pl/plbdetail', {}, function(result) {
+							try {
+								vue.pullRefresh.endPullDownToRefresh();
+							} catch(e) {}
+							if(!result.isSuccess) {
+								return mui.toast(result.reason);
+							}
+//							console.log(JSON.stringify(result.data))
+
+							vue.recharges = result.data;
+
+						});
+					}
+				}
+			});
+		</script>
+	</body>
+
+</html>
