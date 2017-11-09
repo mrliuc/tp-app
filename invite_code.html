@@ -21,7 +21,8 @@
 
 				<div class="mui-card">
 					<div class="mui-card-header">我的邀请码
-						<a class="mui-card-link" v-on:tap="copy">复制</a>
+						<!--<a class="mui-card-link" v-on:tap="copy">复制</a>-->
+						<a class="mui-card-link" v-on:tap="share">分享</a>
 
 					</div>
 					<div class="mui-card-content">
@@ -54,11 +55,11 @@
 					</div>
 
 				</div>
-				
+
 				<div style="text-align: center;margin-top: 30px;">
 					<p style="padding-left: 20px;padding-right: 20px;">邀请好友注册，填写您的邀请码，首单成功后即可获赠3次免费预录哦~</p>
-				<img src="img/QRCode.png" style="width: 150px;" />
-					
+					<img src="img/QRCode.png" style="width: 150px;" />
+
 				</div>
 
 			</div>
@@ -76,7 +77,8 @@
 						PLBalance: {},
 						inviteCode: null,
 						user: null,
-						pullRefresh: null
+						pullRefresh: null,
+						shares: [],
 					},
 					computed: {
 						code: function() {
@@ -99,6 +101,16 @@
 						mui.init();
 						mui.plusReady(function() {
 							vue.user = Util.getData('user');
+
+							plus.share.getServices(function(s) {
+								vue.shares = {};
+								for(var i in s) {
+									var t = s[i];
+									vue.shares[t.id] = t;
+								}
+							}, function(e) {
+								console.log('获取分享服务列表失败：' + e.message);
+							});
 						});
 
 					},
@@ -140,6 +152,88 @@
 							}
 
 							mui.toast('复制成功')
+						},
+						share: function() {
+							var shareBts = [];
+							// 更新分享列表
+							var ss = this.shares['weixin'];
+							ss && ss.nativeClient && (shareBts.push({
+									title: '微信朋友圈',
+									s: ss,
+									x: 'WXSceneTimeline'
+								}),
+								shareBts.push({
+									title: '微信好友',
+									s: ss,
+									x: 'WXSceneSession'
+								}));
+							ss = this.shares['qq'];
+							ss && ss.nativeClient && shareBts.push({
+								title: 'QQ',
+								s: ss
+							});
+							// 弹出分享列表
+							shareBts.length > 0 ? plus.nativeUI.actionSheet({
+								title: '分享链接',
+								cancel: '取消',
+								buttons: shareBts
+							}, function(e) {
+								(e.index > 0) && vue.shareAction(shareBts[e.index - 1], true);
+							}) : plus.nativeUI.alert('当前环境不支付分享操作!');
+						},
+						shareAction: function(sb, bh) {
+							console.log('分享操作：');
+							if(!sb || !sb.s) {
+								console.log('无效的分享服务！');
+								return;
+							}
+							var msg = {
+								content: '内容',
+								extra: {
+									scene: sb.x
+								}
+							};
+
+							Util.ajaxWithLoading('/user/shareMsg', {}, function(result) {
+								if(!result.isSuccess) {
+									return mui.toast('没有分享信息');
+								}
+
+								mui.extend(msg, result.data);
+								// 发送分享
+								if(sb.s.authenticated) {
+									console.log('---已授权---');
+									vue.shareMessage(msg, sb.s);
+								} else {
+									console.log('---未授权---');
+									sb.s.authorize(function() {
+										vue.shareMessage(msg, sb.s);
+									}, function(e) {
+										console.log('认证授权失败：' + e.code + ' - ' + e.message);
+									});
+								}
+
+							});
+
+							//								msg.href = 'http://a.app.qq.com/o/simple.jsp?pkgname=cn.jy.TPApp';
+							//								//		if(sharehrefTitle&&sharehrefTitle.value!=''){
+							//								msg.title = '91货车预录入最低2.5元/条，邀请好友注册成功赠送3次';
+							//								//		}
+							//								//		if(sharehrefDes&&sharehrefDes.value!=''){
+							//								msg.content = '不仅提供最优质的预录入服务，还有大量进出口整车运输订单可接哦';
+							//								//		}
+							//								msg.thumbs = ['images/logo-min.png'];
+							//								msg.pictures = ['http://www.91huoche.cn:23000/apk/logo-min.png'];
+							//								
+
+						},
+						shareMessage: function(msg, s) {
+							console.log(JSON.stringify(msg))
+							s.send(msg, function() {
+								console.log('分享到"' + s.description + '"成功！');
+							}, function(e) {
+								console.log('分享到"' + s.description + '"失败: ' + JSON.stringify(e));
+							});
 						}
 					}
 				});
