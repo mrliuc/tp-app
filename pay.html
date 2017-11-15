@@ -154,9 +154,9 @@
 							if(!result.isSuccess){
 								return mui.toast(result.reason);
 							}
-							
-							mui.toast('发送成功');
-							return mui.back();
+							Util.alert('发送成功<br/>关注<b>【91货车】</b>公众号可及时收到订单状态提醒哦~',function(){
+												return mui.back();
+											});
 							
 						});
 					},
@@ -190,10 +190,13 @@
 										PLNo: vue.info.orderNo
 									}, function(result) {
 										if(result.isSuccess) {
+											
 											plus.nativeUI.closeWaiting();
 
-											mui.toast('发送成功');
-											return mui.back();
+											Util.alert('发送成功<br/>关注<b>【91货车】</b>公众号可及时收到订单状态提醒哦~',function(){
+												return mui.back();
+											});
+//											mui.toast('发送成功');
 
 										}
 										if(count++ > 10) {

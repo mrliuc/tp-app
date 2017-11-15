@@ -151,7 +151,9 @@
 							
 							Util.setData('user',result.data);
 
-							mui.openWindow('main.html','main.html');
+							//mui.openWindow('main.html','main.html');
+							
+							plus.webview.currentWebview().close();
 						});
 					
 					},

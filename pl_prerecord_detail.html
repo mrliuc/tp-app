@@ -356,11 +356,14 @@
 						</div>-->
 				
 				<div id="item2" v-bind:class="['mui-control-content',!isComplete?'mui-active':'']">
-					<div class="mui-scroll-wrapper" id="divWrapper" v-bind:style={'margin-bottom':isConfirm?'0px':''}>
-
+					<ul class="mui-table-view">
+						<li style="text-align: center;">联系电话：<span v-on:tap="call('17701680988')"><span class="mui-icon mui-icon-phone-filled" style="color: green;"></span>17701680988</span></li>
+					</ul>
+					<div class="mui-scroll-wrapper" id="divWrapper" v-bind:style={'margin-bottom':isConfirm?'0px':'','margin-top':'28px'}>
+					
 						<ul class="mui-table-view" style="margin-bottom: 50px;">
 							<div class="mui-collapse-content" style="padding-bottom: 50px;">
-
+							
 								<div v-for="msg in plmsgs">
 									<div v-if="!isPLTypeUpdateStatus(msg.Type)" v-bind:class="['msg-item',msg.UserId?'msg-item-self':'']">
 										<i v-if="msg.UserId" class="msg-user mui-icon mui-icon-person"></i>
@@ -798,6 +801,9 @@
 							vue.scrollToBottom();
 						});
 
+					},
+					call:function(phone){
+						  plus.device.dial(phone, true); 	
 					}
 				}
 			});

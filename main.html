@@ -269,6 +269,7 @@
 									</span>
 
 									<button class="mui-btn mui-btn-primary" v-if="!user" style="margin-top: 8px;" v-on:tap="gotoLogin">登录</button>
+									<button class="mui-btn mui-btn-primary" v-if="!user" style="margin-top: 8px;" v-on:tap="gotoReg">注册</button>
 
 								</div>
 
@@ -531,6 +532,7 @@
 
 		<script src="js/common/model.js"></script>
 		<script src="js/common/common.js"></script>
+		<script src="js/common/autologin.js"></script>
 		<script src="js/update.js"></script>
 
 		<script src="js/vue.min.js"></script>
@@ -623,6 +625,9 @@
 				methods: {
 					gotoLogin: function() {
 						mui.openWindow('login.html', 'login.html');
+					},
+					gotoReg:function(){
+						mui.openWindow('reg.html', 'reg.html');
 					},
 					back: function() {
 						var backButtonPress = 0;
